@@ -1,0 +1,191 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = '悠人の四間飛車党将棋ブログ', description = '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等を書いています。' } = Astro.props;
+const pageTitle = title ? `${title} | 悠人の四間飛車党将棋ブログ` : '悠人の四間飛車党将棋ブログ';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-7499855875738477">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7499855875738477"
+     crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-container">
+        <a href="/" class="logo">悠人の四間飛車党将棋ブログ</a>
+        <nav class="nav-menu">
+          <ul class="nav-list">
+            <li><a href="/" class="nav-link">ホーム</a></li>
+            <li><a href="/blog" class="nav-link">ブログ</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; 2026 悠人の四間飛車党将棋ブログ. All rights reserved.</p>
+    </footer>
+
+    <style is:global>
+      :root {
+        --primary-color: #1a365d;
+        --accent-color: #3182ce;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Noto Sans JP', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f9f9f9;
+      }
+
+      .site-header {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        text-decoration: none;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--primary-color);
+      }
+
+      .nav-list {
+        list-style: none;
+        display: flex;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        color: #2d3748;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .nav-link:hover {
+        color: var(--accent-color);
+      }
+
+      .main-content {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        min-height: calc(100vh - 200px);
+      }
+
+      .site-footer {
+        background: #f7fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      article {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      article h1 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+      }
+
+      article .meta {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+
+      article h2 {
+        color: var(--primary-color);
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+      }
+
+      article p {
+        margin-bottom: 1rem;
+      }
+
+      article ul, article ol {
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      article li {
+        margin-bottom: 0.5rem;
+      }
+
+      article code {
+        background: #f0f0f0;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+      }
+
+      article pre {
+        background: #f0f0f0;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+      }
+
+      a {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </body>
+</html>

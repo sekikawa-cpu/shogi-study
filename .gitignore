@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# build output
+dist/
+.output/
+
+# Astro
+.astro/
+.cache/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Tools
+convert_wordpress.py
+WordPress.*.xml
+articles/

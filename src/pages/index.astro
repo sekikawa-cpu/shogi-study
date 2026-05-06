@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = '悠人の四間飛車党将棋ブログ';
+const description = '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等を書いています。';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="home">
+    <h1>{title}</h1>
+    <p class="tagline">{description}</p>
+
+    <section class="about">
+      <h2>このブログについて</h2>
+      <p>四間飛車党による将棋ブログです。戦型対策、棋書レビュー、将棋ソフト・アプリの紹介など、四間飛車に関するコンテンツを中心に扱っています。</p>
+    </section>
+
+    <section class="recent-posts">
+      <h2>最新の記事</h2>
+      <p>コンテンツ準備中...</p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .home {
+    text-align: center;
+  }
+
+  h1 {
+    color: #1a365d;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+    color: #718096;
+    margin-bottom: 2rem;
+  }
+
+  section {
+    text-align: left;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    color: #1a365d;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #4a5568;
+    line-height: 1.8;
+  }
+</style>
