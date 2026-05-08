@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="ブログ" description="四間飛車に関する将棋ブログの記事一覧">
+  <article>
+    <h1>ブログ記事一覧</h1>
+
+    {posts.length === 0 ? (
+      <p>記事はまだ投稿されていません。</p>
+    ) : (
+      <div class="posts-list">
+        {posts.map((post) => (
+          <div class="post-item">
+            <h2>
+              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+            </h2>
+            <div class="post-meta">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {post.data.pubDate.toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                })}
+              </time>
+              {post.data.author && <span class="author">著者: {post.data.author}</span>}
+            </div>
+            {post.data.description && (
+              <p class="post-description">{post.data.description}</p>
+            )}
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div class="post-tags">
+                {post.data.tags.map((tag) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            )}
+            <a href={`/blog/${post.slug}`} class="read-more">記事を読む →</a>
+          </div>
+        ))}
+      </div>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .post-item {
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .post-item:hover {
+    border-color: #3182ce;
+    box-shadow: 0 2px 8px rgba(49, 130, 206, 0.1);
+  }
+
+  .post-item h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.35rem;
+  }
+
+  .post-item h2 a {
+    color: #1a365d;
+    text-decoration: none;
+  }
+
+  .post-item h2 a:hover {
+    color: #3182ce;
+    text-decoration: underline;
+  }
+
+  .post-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: #718096;
+  }
+
+  time {
+    font-weight: 500;
+  }
+
+  .author {
+    color: #a0aec0;
+  }
+
+  .post-description {
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tag {
+    display: inline-block;
+    background: #edf2f7;
+    color: #2d3748;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .read-more {
+    display: inline-block;
+    color: #3182ce;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .read-more:hover {
+    color: #1a365d;
+    text-decoration: underline;
+  }
+</style>

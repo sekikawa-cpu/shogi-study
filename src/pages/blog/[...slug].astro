@@ -1,0 +1,183 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: any;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={post.data.title} description={post.data.description || ''}>
+  <article>
+    <h1>{post.data.title}</h1>
+
+    <div class="post-meta">
+      <time datetime={post.data.pubDate.toISOString()}>
+        {post.data.pubDate.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </time>
+      {post.data.author && (
+        <span class="author">著者: {post.data.author}</span>
+      )}
+    </div>
+
+    {post.data.categories && post.data.categories.length > 0 && (
+      <div class="post-categories">
+        <strong>カテゴリー:</strong>
+        {post.data.categories.map((cat: string) => (
+          <span class="category">{cat}</span>
+        ))}
+      </div>
+    )}
+
+    <div class="post-content">
+      <Content />
+    </div>
+
+    {post.data.tags && post.data.tags.length > 0 && (
+      <div class="post-tags">
+        <strong>タグ:</strong>
+        {post.data.tags.map((tag: string) => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )}
+
+    <div class="post-navigation">
+      <a href="/blog" class="back-link">← ブログに戻る</a>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  article h1 {
+    margin-bottom: 1rem;
+  }
+
+  .post-meta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.95rem;
+    color: #718096;
+  }
+
+  time {
+    font-weight: 600;
+    color: #4a5568;
+  }
+
+  .post-categories {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .category {
+    display: inline-block;
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 0.35rem 0.85rem;
+    border-radius: 5px;
+  }
+
+  .post-content {
+    line-height: 1.8;
+    margin: 2rem 0;
+  }
+
+  .post-content :global(h2) {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .post-content :global(h3) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .post-content :global(ul),
+  .post-content :global(ol) {
+    margin-bottom: 1rem;
+  }
+
+  .post-content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .post-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 4px solid #3182ce;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #4a5568;
+    font-style: italic;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .tag {
+    display: inline-block;
+    background: #f7fafc;
+    color: #2d3748;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid #cbd5e0;
+  }
+
+  .post-navigation {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .back-link {
+    color: #3182ce;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+
+  .back-link:hover {
+    color: #1a365d;
+    text-decoration: underline;
+  }
+</style>
