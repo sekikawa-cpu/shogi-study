@@ -22,7 +22,8 @@
       "Bash(git fetch *)",
       "Bash(git rebase *)",
       "WebFetch(domain:tech-wealth-mind.com)",
-      "Bash(git commit -m 'fix: Update author names and properly embed images in blog posts *)"
+      "Bash(git commit -m 'fix: Update author names and properly embed images in blog posts *)",
+      "Bash(git commit -m 'fix: Convert markdown image syntax to HTML img tags for proper rendering *)"
     ]
   }
 }
