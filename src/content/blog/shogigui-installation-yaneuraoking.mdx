@@ -1,6 +1,6 @@
 ---
 title: "将棋ソフト「ShogiGUI」導入方法（やねうら王＋Kristallweizen改v0.4）"
-pubDate: Mon, 30 De
+pubDate: 2020-12-30
 author: "sekijunadmin"
 description: ""
 categories: ["ShogiGUI", "将棋ソフト", "将棋ソフト・アプリ"]
@@ -27,15 +27,15 @@ ShogiGUI単体では動作することができず、他に思考エンジンと
 
 ↓
 
-&nbsp;
+
 
 3. 解凍ソフトで上記2.でダウンロードしたzipファイルを解凍します。
 
-&nbsp;
+
 
 4. 解凍したフォルダ内の「ShogiGUI.exe」を右クリックし、デスクトップに起動ショートカットを作成します。
 
-&nbsp;
+
 
 5. デスクトップに作成したショートカットの名前を変更します。
 変更前：ShogiGUI.exe - ショートカット
@@ -43,98 +43,98 @@ ShogiGUI単体では動作することができず、他に思考エンジンと
 
 ↓
 
-&nbsp;
+
 
 6. デスクトップのショートカットを実行し、ShogiGUIが起動できることを確認します。
 
 # # 思考エンジンダウンロード
 1. **やねうら王のGitHubサイト**にアクセスします。
 
-&nbsp;
+
 
 2. 最新バージョンのzipファイルをクリックし、C:\Applicationに保存します。
 
 ↓
 
-&nbsp;
+
 
 3. 解凍ソフトで上記2.でダウンロードしたzipファイルを解凍します。
 
-&nbsp;
+
 
 4. C:\Application\ShogiGUIv0.0.7.14 フォルダ内に、"YaneuraOu＋Kristallweizenv4" フォルダ（※）を作成します。
 ※）エンジンを格納するフォルダ
 
-&nbsp;
+
 
 5. 以下の通りにエンジンファイルをコピーします。
 コピー元：C:\Application\YaneuraOu2019V488all\YaneuraOu2018NNUE_sse42.exe
 コピー先：C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4
 
-&nbsp;
+
 # # 評価関数ダウンロード
 1. **たま氏のGitHubサイト**にアクセスします。
 
-&nbsp;
+
 
 2. 下にスクロールし、「Kristallweizen_kaiV0.4.zip」をクリックします。
 
-&nbsp;
+
 
 3. 詳細画面に遷移しますので、ページ下部の「Download」ボタンをクリックし、C:\Applicationに保存します。
 
 ↓
 
-&nbsp;
+
 
 4. 解凍ソフトで上記3.でダウンロードしたzipファイルを解凍します。
 
-&nbsp;
+
 
 5. 以下の通りに評価関数フォルダをコピーします。
 コピー元：C:\Application\Kristallweizen_kaiV0.4\eval
 コピー先：C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4
 
-&nbsp;
+
 # # ShogiGUI思考エンジン追加・設定
 # # # 思考エンジン追加
 1. ShogiGUIを起動します。
 
-&nbsp;
+
 
 2. メニュー [ツール] - [エンジン設定]を押下します。
 
-&nbsp;
+
 
 3. エンジン一覧画面が表示されますので、「追加」ボタンを押下します。
 
-&nbsp;
+
 
 4. 開くダイアログ画面が表示されますので、以下のファイルを選択し、「開く」ボタンを押下します。
 C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4\YaneuraOu2018NNUE_sse42.exe
 
-&nbsp;
+
 
 5. エンジン設定画面に遷移しますので、エンジン名に以下の文字列を入力し、「OK」ボタンを押下します。
 "やねうら王＋Kristallweizen改v0.4"
 
-&nbsp;
+
 
 6. エンジン一覧画面に遷移しますので、「OK」ボタンを押下します。
 
-&nbsp;
+
 # # # [検討]に追加した思考エンジンを適用
 1. ツールバー [検討]を押下します。
 
-&nbsp;
+
 
 2. 検討画面が表示されますので、エンジン設定のプルダウンに「やねうら王＋Kristallweizen改v0.4」を選択し、「設定のみ」ボタンを押下します。
 
-&nbsp;
+
 
 3. 動作確認の為、再度ツールバー [検討]を押下し、検討画面では「検討開始」ボタンを押下します。
 
-&nbsp;
+
 
 4. 盤面の最善手が表示され、且つ、画面下部「検討」タブの内容が表示された場合は、追加したエンジンは正常に動作しています。
 ※. PCのCPUとエンジンファイル（*.exe）との相性が悪い等が原因でエラーとなる場合があります、その場合は他のエンジンファイルにてお試しください。
@@ -142,11 +142,11 @@ C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4\YaneuraOu2018NNUE_
 # # # [棋譜解析]に追加した思考エンジンを適用
 1. メニュー [対局] - [棋譜解析]を押下します。
 
-&nbsp;
+
 
 2. 棋譜解析画面が表示されますので、エンジン設定のプルダウンに「やねうら王＋Kristallweizen改v0.4」を選択し、「設定のみ」ボタンを押下します。
 
-&nbsp;
+
 
 3. 動作確認の為、数手指した後、メニュー [対局] - [棋譜解析]を押下します。
 
@@ -154,7 +154,7 @@ C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4\YaneuraOu2018NNUE_
 
 棋譜解析画面では「解析開始」ボタンを押下します。
 
-&nbsp;
+
 
 4. 解析一覧画面が表示された場合は、追加したエンジンは正常に動作しています。
 ※. PCのCPUとエンジンファイル（*.exe）との相性が悪い等が原因でエラーとなる場合があります、その場合は他のエンジンファイルにてお試しください。
@@ -163,6 +163,6 @@ C:\Application\ShogiGUIv0.0.7.14\YaneuraOu＋Kristallweizenv4\YaneuraOu2018NNUE_
 
 解析が完了すると解析結果画面が表示されます。
 
-&nbsp;
+
 
 以上となります。
