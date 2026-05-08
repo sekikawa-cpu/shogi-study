@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat)",
+      "Bash(chmod +x fix_blog_files.sh)",
+      "Bash(./fix_blog_files.sh)",
+      "Bash(npm run *)",
+      "Bash(python3)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'feat: Migrate WordPress blog to Astro with content collections' --body ' *)",
+      "Bash(command -v gh)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "PowerShell(choco install gh -y 2>&1)",
+      "PowerShell(tail -20)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git fetch *)",
+      "Bash(git rebase *)",
+      "WebFetch(domain:tech-wealth-mind.com)",
+      "Bash(git commit -m 'fix: Update author names and properly embed images in blog posts *)"
+    ]
+  }
+}
