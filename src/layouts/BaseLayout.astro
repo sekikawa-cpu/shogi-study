@@ -20,37 +20,130 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-7499855875738477">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7499855875738477"
      crossorigin="anonymous"></script>
   </head>
   <body>
-    <header class="site-header">
-      <div class="header-container">
-        <a href="/" class="logo">悠人の四間飛車党将棋ブログ</a>
-        <nav class="nav-menu">
+    <div class="layout-wrapper">
+      <header class="site-header">
+        <div class="header-top">
+          <button id="menu-toggle" class="menu-toggle">☰ MENU</button>
+          <a href="/" class="logo">♔ 悠人の四間飛車党将棋ブログ</a>
+          <div class="search-placeholder"></div>
+        </div>
+
+        <nav id="nav-menu" class="nav-menu nav-hidden">
+          <div class="nav-close">
+            <button id="nav-close-btn">✕ CLOSE</button>
+          </div>
           <ul class="nav-list">
-            <li><a href="/" class="nav-link">ホーム</a></li>
-            <li><a href="/blog" class="nav-link">ブログ</a></li>
+            <li class="nav-category">
+              <a href="/blog">♔ 将棋</a>
+              <ul class="nav-subcategory">
+                <li><a href="/blog?tag=四間飛車">四間飛車</a></li>
+                <li><a href="/blog?tag=棋譜">棋譜</a></li>
+                <li><a href="/blog?tag=ShogiGUI">ShogiGUI</a></li>
+                <li><a href="/blog?tag=将棋ソフト">将棋ソフト</a></li>
+              </ul>
+            </li>
+            <li class="nav-category">
+              <a href="/blog">📚 棋書</a>
+              <ul class="nav-subcategory">
+                <li><a href="/blog?tag=棋書レビュー">棋書レビュー</a></li>
+                <li><a href="/blog?tag=上達">上達</a></li>
+              </ul>
+            </li>
+            <li class="nav-category">
+              <a href="/blog">🎓 体験記</a>
+              <ul class="nav-subcategory">
+                <li><a href="/blog?tag=体験記">体験記</a></li>
+                <li><a href="/blog?tag=道場">道場</a></li>
+                <li><a href="/blog?tag=初段">初段</a></li>
+              </ul>
+            </li>
           </ul>
         </nav>
+      </header>
+
+      <div class="container">
+        <main class="main-content">
+          <slot />
+        </main>
+
+        <aside class="sidebar">
+          <div class="sidebar-section">
+            <h3>検索</h3>
+            <div class="search-box">
+              <input type="text" placeholder="記事を検索..." />
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>💡 About</h3>
+            <div class="about-box">
+              <p>四間飛車党による将棋ブログです。戦型対策、棋書レビュー、将棋ソフト・アプリの紹介など、四間飛車に関するコンテンツを中心に扱っています。</p>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>📌 カテゴリー</h3>
+            <ul class="category-list">
+              <li><a href="/blog?tag=将棋ソフト">♔ 将棋ソフト</a></li>
+              <li><a href="/blog?tag=棋譜">📝 棋譜</a></li>
+              <li><a href="/blog?tag=体験記">📖 体験記</a></li>
+              <li><a href="/blog?tag=棋書">📚 棋書</a></li>
+            </ul>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>🏷️ タグ</h3>
+            <div class="tags-cloud">
+              <a href="/blog?tag=ShogiGUI" class="tag">ShogiGUI</a>
+              <a href="/blog?tag=将棋ウォーズ" class="tag">将棋ウォーズ</a>
+              <a href="/blog?tag=四間飛車" class="tag">四間飛車</a>
+              <a href="/blog?tag=棋譜" class="tag">棋譜</a>
+              <a href="/blog?tag=将棋ソフト" class="tag">将棋ソフト</a>
+            </div>
+          </div>
+        </aside>
       </div>
-    </header>
 
-    <main class="main-content">
-      <slot />
-    </main>
+      <footer class="site-footer">
+        <p>&copy; 2026 悠人の四間飛車党将棋ブログ. All rights reserved.</p>
+        <p>このサイトはAstroとTailwind CSSで構築されています。</p>
+      </footer>
+    </div>
 
-    <footer class="site-footer">
-      <p>&copy; 2026 悠人の四間飛車党将棋ブログ. All rights reserved.</p>
-    </footer>
+    <script>
+      const menuToggle = document.getElementById('menu-toggle');
+      const navMenu = document.getElementById('nav-menu');
+      const navCloseBtn = document.getElementById('nav-close-btn');
+
+      menuToggle?.addEventListener('click', () => {
+        navMenu?.classList.remove('nav-hidden');
+      });
+
+      navCloseBtn?.addEventListener('click', () => {
+        navMenu?.classList.add('nav-hidden');
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (navMenu && !navMenu.contains(e.target) && !menuToggle?.contains(e.target)) {
+          navMenu.classList.add('nav-hidden');
+        }
+      });
+    </script>
 
     <style is:global>
       :root {
         --primary-color: #1a365d;
         --accent-color: #3182ce;
+        --sidebar-bg: #f7fafc;
+        --border-color: #e2e8f0;
       }
 
       * {
@@ -63,64 +156,332 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         font-family: 'Noto Sans JP', sans-serif;
         line-height: 1.6;
         color: #333;
-        background-color: #f9f9f9;
+        background-color: #fafbfc;
       }
 
+      .layout-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* Header Styles */
       .site-header {
         background: white;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
         z-index: 100;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
 
-      .header-container {
-        max-width: 1200px;
+      .header-top {
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 1rem 1.5rem;
+        padding: 1.25rem 1.5rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 2rem;
+      }
+
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        cursor: pointer;
+        padding: 0.5rem 0;
+        transition: color 0.2s;
+      }
+
+      .menu-toggle:hover {
+        color: var(--accent-color);
       }
 
       .logo {
         text-decoration: none;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 800;
         color: var(--primary-color);
+        flex-shrink: 0;
+      }
+
+      .search-placeholder {
+        flex: 1;
+      }
+
+      /* Navigation Styles */
+      .nav-menu {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        padding: 0 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .nav-menu.nav-hidden {
+        display: none;
+      }
+
+      .nav-close {
+        display: none;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .nav-close button {
+        background: none;
+        border: none;
+        font-weight: 700;
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 0.95rem;
       }
 
       .nav-list {
         list-style: none;
         display: flex;
+        gap: 3rem;
+        padding: 0;
+      }
+
+      .nav-category > a {
+        display: block;
+        padding: 1.25rem 0;
+        text-decoration: none;
+        font-weight: 600;
+        color: var(--primary-color);
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .nav-category > a:hover {
+        color: var(--accent-color);
+        border-bottom-color: var(--accent-color);
+      }
+
+      .nav-subcategory {
+        list-style: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .nav-category:hover .nav-subcategory {
+        max-height: 500px;
+      }
+
+      .nav-subcategory li a {
+        display: block;
+        padding: 0.75rem 0 0.75rem 1.5rem;
+        text-decoration: none;
+        color: #4a5568;
+        font-size: 0.95rem;
+        transition: color 0.2s;
+      }
+
+      .nav-subcategory li a:hover {
+        color: var(--accent-color);
+      }
+
+      /* Container and Main Layout */
+      .container {
+        flex: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        padding: 2rem 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 300px;
         gap: 2rem;
       }
 
-      .nav-link {
+      .main-content {
+        min-height: calc(100vh - 300px);
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .sidebar-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .sidebar-section h3 {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-family: 'Noto Sans JP', sans-serif;
+        font-size: 0.95rem;
+      }
+
+      .search-box input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+      }
+
+      .about-box {
+        color: #4a5568;
+        font-size: 0.95rem;
+        line-height: 1.7;
+      }
+
+      .category-list {
+        list-style: none;
+      }
+
+      .category-list li {
+        margin-bottom: 0.5rem;
+      }
+
+      .category-list a {
         text-decoration: none;
-        color: #2d3748;
+        color: #3182ce;
         font-weight: 500;
         transition: color 0.2s;
       }
 
-      .nav-link:hover {
-        color: var(--accent-color);
+      .category-list a:hover {
+        color: var(--primary-color);
       }
 
-      .main-content {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1.5rem;
-        min-height: calc(100vh - 200px);
+      .tags-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
 
+      .tags-cloud .tag {
+        display: inline-block;
+        background: #edf2f7;
+        color: #2d3748;
+        padding: 0.4rem 0.75rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+
+      .tags-cloud .tag:hover {
+        background: var(--accent-color);
+        color: white;
+      }
+
+      /* Footer */
       .site-footer {
         background: #f7fafc;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border-color);
         padding: 2rem 1.5rem;
         text-align: center;
         color: #718096;
         font-size: 0.9rem;
+        margin-top: auto;
+      }
+
+      .site-footer p {
+        margin: 0.5rem 0;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
+        .container {
+          grid-template-columns: 1fr 250px;
+          gap: 1.5rem;
+          padding: 1.5rem 1rem;
+        }
+
+        .nav-list {
+          gap: 2rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .menu-toggle {
+          display: block;
+        }
+
+        .nav-menu {
+          position: fixed;
+          left: 0;
+          top: 60px;
+          right: 0;
+          bottom: 0;
+          max-width: 100%;
+          border: none;
+          background: white;
+          flex-direction: column;
+          padding: 0;
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .nav-menu.nav-hidden {
+          display: none;
+        }
+
+        .nav-close {
+          display: block;
+        }
+
+        .nav-list {
+          flex-direction: column;
+          gap: 0;
+          padding: 0;
+        }
+
+        .nav-category > a {
+          border: none;
+          border-bottom: 1px solid var(--border-color);
+          padding: 1rem 1.5rem;
+        }
+
+        .nav-category:hover .nav-subcategory {
+          max-height: 500px;
+        }
+
+        .nav-subcategory li a {
+          padding: 0.75rem 1.5rem 0.75rem 3rem;
+        }
+
+        .container {
+          grid-template-columns: 1fr;
+          padding: 1rem;
+        }
+
+        .sidebar {
+          order: -1;
+          margin-bottom: 2rem;
+        }
+
+        .header-top {
+          padding: 1rem;
+          gap: 1rem;
+        }
+
+        .logo {
+          font-size: 1rem;
+        }
       }
 
       article {
