@@ -33,7 +33,7 @@ PC、タブレット、スマートフォン等、デバイスによって異な
 駒のグラフィックは、スマートフォンでの表示では煩雑な感じがありましたので、シンプルなものにしました。
 デザインは将棋DB2を参考にしています。
 
-[blogcard url="https://shogidb2.com/"]
+[![将棋DB2](/images/blog/shogidb2-thumbnail.jpg)](https://shogidb2.com/)
 # # # 評価値表示
 ShogiGUIで棋譜解析していることが前提ですが、局面ごとの評価値を表示します。
 # # # 盤面タッチに対応
@@ -42,29 +42,37 @@ ShogiGUIで棋譜解析していることが前提ですが、局面ごとの評
 
 # # サンプル
 # # # 通常
-&lt;script type="kif"&gt;
+```html
+<script type="kif">
 sample1.kif
-&lt;/script&gt;
+</script>
+```
 開始局面（0手目）の状態で開始します。
-[iframe src="https://shogi-study.com/wp-content/themes/the-thor/kifPlayer/html+kif/20200106_487/sample1.html" height="600" scrolling="no"][/iframe]
+[iframe src="/kifPlayer/sample1.html" height="600" scrolling="no"][/iframe]
 # # # 局面を指定して表示
-&lt;script type="kif" start="17"&gt;
-sample2-1.kif
-&lt;/script&gt;
+```html
+<script type="kif" start="17">
+sample1.kif
+</script>
+```
 指定局面（17手目）の状態で開始します。
-[iframe src="https://shogi-study.com/wp-content/themes/the-thor/kifPlayer/html+kif/20200106_487/sample2-1.html" height="600" scrolling="no"][/iframe]
+[iframe src="/kifPlayer/sample2-1.html" height="600" scrolling="no"][/iframe]
 # # # 反転して初期表示
-&lt;script type="kif" start="17" reverse&gt;
-sample2-1.kif
-&lt;/script&gt;
+```html
+<script type="kif" start="17" reverse>
+sample1.kif
+</script>
+```
 上の例に加え、先手後手を反転した状態で開始します。
-[iframe src="https://shogi-study.com/wp-content/themes/the-thor/kifPlayer/html+kif/20200106_487/sample2-2.html" height="600" scrolling="no"][/iframe]
+[iframe src="/kifPlayer/sample2-2.html" height="600" scrolling="no"][/iframe]
 # # # 詰将棋等の部分図
-&lt;script type="kif"&gt;
-sample3.kif
-&lt;/script&gt;
+```html
+<script type="kif">
+sample1.kif
+</script>
+```
 平手以外に、詰将棋等の部分図にも利用可能です。
-[iframe src="https://shogi-study.com/wp-content/themes/the-thor/kifPlayer/html+kif/20200106_487/sample3.html" height="600" scrolling="no"][/iframe]
+[iframe src="/kifPlayer/sample3.html" height="600" scrolling="no"][/iframe]
 # # 参考
 本記事中に4つのkifPlayerを表示していますが、4つのHTMLファイルを作成し、「iframe 」タグ（※）で記事内に埋め込んでおります。
 ※）プラグイン「iframe」を利用
