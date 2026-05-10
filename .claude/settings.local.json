@@ -52,7 +52,10 @@
       "Bash(git commit *)",
       "WebFetch(domain:shogi-study.com)",
       "WebFetch(domain:web.archive.org)",
-      "Bash(iconv -f SHIFT_JIS -t UTF-8)"
+      "Bash(iconv -f SHIFT_JIS -t UTF-8)",
+      "Bash(cd \"/c/Apps/shogi-study.com/.claude/worktrees/serene-kapitsa-220bdd\" && grep -A 2 -B 2 '<iframe' dist/blog/kifplayer-browser-tool/index.html | head -40)",
+      "Bash(gh auth *)",
+      "Bash(cd \"/c/Apps/shogi-study.com/.claude/worktrees/serene-kapitsa-220bdd\" && find src -name \"*.css\" -o -name \"*.astro\" | grep -E \"\\(layout|article|blog|style\\)\" | head -20)"
     ]
   }
 }
