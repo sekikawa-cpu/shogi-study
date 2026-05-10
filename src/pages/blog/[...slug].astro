@@ -143,6 +143,39 @@ const { Content } = await post.render();
     font-style: italic;
   }
 
+  .post-content :global(pre) {
+    background-color: #1e1e1e !important;
+    color: #d4d4d4 !important;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border: 1px solid #333;
+  }
+
+  .post-content :global(code) {
+    color: #d4d4d4 !important;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+  }
+
+  .post-content :global(.astro-code) {
+    background-color: #1e1e1e !important;
+  }
+
+  .post-content :global(.astro-code span) {
+    color: #d4d4d4 !important;
+  }
+
+  .post-content :global(iframe) {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: block;
+    margin: 1.5rem 0;
+  }
+
   .post-tags {
     display: flex;
     gap: 0.5rem;
