@@ -525,18 +525,47 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       }
 
       article code {
-        background: #f0f0f0;
+        background: #2d2d2d;
+        color: #f0f0f0 !important;
         padding: 0.2rem 0.4rem;
         border-radius: 3px;
-        font-family: 'Courier New', monospace;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       }
 
       article pre {
-        background: #f0f0f0;
-        padding: 1rem;
+        background-color: #2d2d2d !important;
+        color: #f0f0f0 !important;
+        padding: 1.5rem !important;
         border-radius: 8px;
         overflow-x: auto;
         margin-bottom: 1rem;
+        border: 1px solid #404040;
+      }
+
+      article pre code {
+        background: transparent !important;
+        color: #f0f0f0 !important;
+        padding: 0 !important;
+      }
+
+      /* Override Astro code highlighting colors */
+      article pre[style*="background-color"] {
+        background-color: #2d2d2d !important;
+        color: #f0f0f0 !important;
+      }
+
+      article .astro-code {
+        background: #2d2d2d !important;
+        color: #f0f0f0 !important;
+      }
+
+      article .astro-code span {
+        color: #f0f0f0 !important;
+      }
+
+      /* Use filter to brighten the colored syntax tokens */
+      article .astro-code [style] {
+        filter: brightness(1.2) saturate(1.1) !important;
       }
 
       a {
