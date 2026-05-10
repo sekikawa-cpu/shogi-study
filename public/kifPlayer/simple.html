@@ -9,10 +9,11 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link href="/kifPlayer/shogistyle.css" rel="stylesheet">
 </head>
-<body style="margin: 0; padding: 0;">
-<data class="shogiboard" id="kif" value="ryu3001">
-<svg id="board" xmlns="http://www.w3.org/2000/svg" width="450" height="570" viewBox="0, 0, 450, 570"></svg>
-<script type="kif">
+<body>
+<div class="container" style="padding: 20px;">
+  <data class="shogiboard" id="kif" value="ryu3001">
+    <svg id="board" xmlns="http://www.w3.org/2000/svg" width="450" height="570" viewBox="0, 0, 450, 570"></svg>
+    <script type="kif">
 手合割：平手
 先手：振り飛車
 後手：居飛車
@@ -22,13 +23,9 @@
    3 ６六歩(67)        ( 0:02/00:00:04)
    4 ３四歩(33)        ( 0:00/00:00:02)
    5 ６八飛(28)        ( 0:01/00:00:05)
-   6 ６二銀(71)        ( 0:02/00:00:04)
-   7 ４八玉(59)        ( 0:03/00:00:08)
-   8 ５四歩(53)        ( 0:03/00:00:07)
-   9 ７八銀(79)        ( 0:02/00:00:10)
-  10 ４二玉(51)        ( 0:03/00:00:10)
-</script>
-</data>
-<script src="/kifPlayer/kifPlayer.js"></script>
+    </script>
+  </data>
+</div>
+<script src="/kifPlayer/kifPlayer.js" defer></script>
 </body>
 </html>
