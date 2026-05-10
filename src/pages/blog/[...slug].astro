@@ -237,12 +237,15 @@ const { Content } = await post.render();
     margin: 1.5rem 0;
     border-radius: 4px;
     line-height: 1.8;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
   }
 
   .post-content :global(.feature-box) :global(p) {
     margin: 0;
+    font-weight: 600;
+  }
+
+  .post-content :global(.feature-box) :global(strong) {
+    font-weight: 700;
   }
 
   /* Heading styles with borders */
@@ -253,6 +256,7 @@ const { Content } = await post.render();
     margin-top: 2rem;
     margin-bottom: 0.75rem;
     scroll-margin-top: 6rem;
+    font-weight: 700;
   }
 
   .post-content :global(h2:nth-of-type(1)) {
