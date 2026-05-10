@@ -49,7 +49,10 @@
       "Bash(cp -v \"C:\\\\Temp\\\\kifPlayer\\\\js\\\\kifPlayer.js\" .)",
       "Bash(cp -v \"C:\\\\Temp\\\\kifPlayer\\\\html+kif\\\\sample1.html\" .)",
       "Bash(cp -v \"C:\\\\Temp\\\\kifPlayer\\\\html+kif\\\\sample1.kif\" .)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "WebFetch(domain:shogi-study.com)",
+      "WebFetch(domain:web.archive.org)",
+      "Bash(iconv -f SHIFT_JIS -t UTF-8)"
     ]
   }
 }
