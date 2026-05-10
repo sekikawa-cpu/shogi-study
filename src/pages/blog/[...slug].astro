@@ -176,6 +176,73 @@ const { Content } = await post.render();
     margin: 1.5rem 0;
   }
 
+  /* Table of Contents Styles - Markdown format */
+  .post-content > :global(h2:nth-of-type(1)) {
+    border: none;
+    background: none;
+    padding: 0;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: #5ca9f7;
+    font-weight: 700;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) {
+    border: 1px solid #cfcfcf;
+    padding: 1.5rem;
+    background: #fffef6;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    list-style: none;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) :global(li) :global(a) {
+    color: #5ca9f7;
+    text-decoration: none;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) :global(li) :global(a:hover) {
+    text-decoration: underline;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) :global(ul) {
+    list-style: none;
+    margin: 0.5rem 0 0 2rem;
+    padding: 0;
+  }
+
+  .post-content > :global(h2:nth-of-type(1)) + :global(ol) :global(ul) :global(li) {
+    margin-bottom: 0.25rem;
+  }
+
+  /* Heading styles with borders */
+  .post-content :global(h2) {
+    border-left: 5px solid #205a97;
+    background-color: #f2f2f2;
+    padding: 0.75rem 0 0.75rem 1rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    scroll-margin-top: 6rem;
+  }
+
+  .post-content :global(h2:nth-of-type(1)) {
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
+  .post-content :global(h3) {
+    border-bottom: solid 2px #205a97;
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    scroll-margin-top: 6rem;
+  }
+
   .post-tags {
     display: flex;
     gap: 0.5rem;
