@@ -237,10 +237,12 @@ const { Content } = await post.render();
     margin: 1.5rem 0;
     border-radius: 4px;
     line-height: 1.8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .post-content :global(.feature-box) :global(p) {
-    margin-bottom: 0.5rem;
+    margin: 0;
   }
 
   /* Heading styles with borders */
