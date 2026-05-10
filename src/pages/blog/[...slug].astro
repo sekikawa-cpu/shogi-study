@@ -144,27 +144,37 @@ const { Content } = await post.render();
   }
 
   .post-content :global(pre) {
-    background-color: #1e1e1e !important;
-    color: #d4d4d4 !important;
+    background-color: #f0f0f0 !important;
+    color: #ff6b35 !important;
     padding: 1rem;
     border-radius: 6px;
     overflow-x: auto;
     margin: 1.5rem 0;
-    border: 1px solid #333;
+    border: 1px solid #e0e0e0;
+    font-weight: bold;
   }
 
   .post-content :global(code) {
-    color: #d4d4d4 !important;
+    color: #ff6b35 !important;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.9rem;
+    font-weight: bold;
   }
 
   .post-content :global(.astro-code) {
-    background-color: #1e1e1e !important;
+    background-color: #f0f0f0 !important;
+    color: #ff6b35 !important;
   }
 
   .post-content :global(.astro-code span) {
-    color: #d4d4d4 !important;
+    color: #ff6b35 !important;
+    font-weight: bold;
+  }
+
+  /* Override all inline color styles in code blocks */
+  .post-content :global(.astro-code [style*="color"]) {
+    color: #ff6b35 !important;
+    font-weight: bold;
   }
 
   .post-content :global(iframe) {

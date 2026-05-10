@@ -525,49 +525,55 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       }
 
       article code {
-        background: #f5f5f5;
-        color: #333 !important;
+        background: #f0f0f0;
+        color: #ff6b35 !important;
+        font-weight: bold;
         padding: 0.2rem 0.4rem;
         border-radius: 3px;
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
-        border: 1px solid #ddd;
+        border: 1px solid #e0e0e0;
       }
 
       article pre {
-        background-color: #f8f8f8 !important;
-        color: #333 !important;
+        background-color: #f0f0f0 !important;
+        color: #ff6b35 !important;
+        font-weight: bold;
         padding: 1.5rem !important;
         border-radius: 8px;
         overflow-x: auto;
         margin-bottom: 1rem;
-        border: 1px solid #ddd;
+        border: 1px solid #e0e0e0;
       }
 
       article pre code {
         background: transparent !important;
-        color: #333 !important;
+        color: #ff6b35 !important;
+        font-weight: bold;
         padding: 0 !important;
       }
 
       /* Override Astro code highlighting colors */
       article pre[style*="background-color"] {
-        background-color: #f8f8f8 !important;
-        color: #333 !important;
+        background-color: #f0f0f0 !important;
+        color: #ff6b35 !important;
+        font-weight: bold;
       }
 
       article .astro-code {
-        background: #f8f8f8 !important;
-        color: #333 !important;
+        background: #f0f0f0 !important;
+        color: #ff6b35 !important;
+        font-weight: bold;
       }
 
       article .astro-code span {
-        color: inherit !important;
+        color: #ff6b35 !important;
+        font-weight: bold;
       }
 
       /* Highlight colored syntax tokens */
       article .astro-code [style*="color"] {
-        color: inherit !important;
-        opacity: 0.9;
+        color: #ff6b35 !important;
+        font-weight: bold;
       }
 
       a {

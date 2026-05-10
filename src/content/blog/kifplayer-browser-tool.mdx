@@ -29,11 +29,12 @@ tags: ["kifPlayer"]
 6. [さいごに](#さいごに)
 
 ## はじめに
+
 棋書レビュー、戦法別対策等に利用する目的で棋譜再生ツールを色々探しましたが、私の要件（レスポンシブ対応、KIF対応）を満たすものが得られませんでした。
 そこで、棋譜再生ツール探しの過程で得た先人の知恵（公開ソース）をお借りして、自分用にカスタマイズし「kifPlayer」を作成しました。
 
+## 「kifPlayer」の特徴
 
-# # 「kifPlayer」の特徴
 「kifPlayer」の特徴は以下の通りです。
 ・レスポンシブ対応（PC、モバイル等、異なるデバイスに表示対応）←重要
 ・JavaScript製
@@ -41,68 +42,98 @@ tags: ["kifPlayer"]
 ・**将棋DB2に似たGUI**
 **・評価値表示**
 **・盤面タッチに対応**
-# # # レスポンシブ対応
+
+### レスポンシブ対応
+
 PC、タブレット、スマートフォン等、デバイスによって異なる画面サイズでも、柔軟に対象となる画像を調整して表示してくれます。
-# # # JavaScript製
+
+### JavaScript製
+
 これまでWebで棋譜再生ツールは、Adobe Flash Playerを利用したものが主流でした。
 しかし、Adobe社より2020年末にAdobe Flash Playerのサポート終了する発表がありました。
 それに伴い、棋譜再生ツールもAdobe Flash Playerに依存しないものが求められるようになり、それに代わって主流になりつつあるJavaScriptを採用しています。
-# # # KIF形式ファイルに対応
+
+### KIF形式ファイルに対応
+
 私が愛用するShogiGUIの標準が、KIF形式ファイルであった為。残念ながらCSA形式ファイルには対応していません。
-# # # 将棋DB2に似たGUI
+
+### 将棋DB2に似たGUI
+
 駒のグラフィックは、スマートフォンでの表示では煩雑な感じがありましたので、シンプルなものにしました。
 デザインは将棋DB2を参考にしています。
 
 [![将棋DB2](/images/blog/shogidb2-thumbnail.jpg)](https://shogidb2.com/)
-# # # 評価値表示
+
+### 評価値表示
+
 ShogiGUIで棋譜解析していることが前提ですが、局面ごとの評価値を表示します。
-# # # 盤面タッチに対応
+
+### 盤面タッチに対応
+
 スマートフォンアプリの将棋DB2と同じように、盤面の左半分をタッチすると一手戻り、盤面の右半分をタッチすると一手進みます。
 
+## サンプル
 
-# # サンプル
-# # # 通常
+### 通常
+
 ```html
 <script type="kif">
 sample1.kif
 </script>
 ```
+
 開始局面（0手目）の状態で開始します。
+
 <iframe src="/kifPlayer/sample1.html" height="600" scrolling="no"></iframe>
-# # # 局面を指定して表示
+
+### 局面を指定して表示
+
 ```html
 <script type="kif" start="17">
 sample1.kif
 </script>
 ```
+
 指定局面（17手目）の状態で開始します。
+
 <iframe src="/kifPlayer/sample2-1.html" height="600" scrolling="no"></iframe>
-# # # 反転して初期表示
+
+### 反転して初期表示
+
 ```html
 <script type="kif" start="17" reverse>
 sample1.kif
 </script>
 ```
+
 上の例に加え、先手後手を反転した状態で開始します。
+
 <iframe src="/kifPlayer/sample2-2.html" height="600" scrolling="no"></iframe>
-# # # 詰将棋等の部分図
+
+### 詰将棋等の部分図
+
 ```html
 <script type="kif">
 sample1.kif
 </script>
 ```
+
 平手以外に、詰将棋等の部分図にも利用可能です。
+
 <iframe src="/kifPlayer/sample3.html" height="600" scrolling="no"></iframe>
-# # 参考
+
+## 参考
+
 本記事中に4つのkifPlayerを表示していますが、4つのHTMLファイルを作成し、「iframe 」タグ（※）で記事内に埋め込んでおります。
 ※）プラグイン「iframe」を利用
 
+## ダウンロード
 
-# # ダウンロード
 [download id="1"]
 [download id="2"]
 
-# # さいごに
+## さいごに
+
 本ツール作成に際して、以下のツールを参考にさせていただきました。
 
 Kifu Nyamo（仮）
@@ -112,4 +143,3 @@ Kifu Nyamo（仮）
 [blogcard url="https://spelunker2.wordpress.com/2018/09/20/shogitime/"]
 
 「Kifu Nyamo（仮）」作成者のえむいー様、「将棋タイム」作成者様のお二方には、この場をお借りしてお礼申し上げます。
-
