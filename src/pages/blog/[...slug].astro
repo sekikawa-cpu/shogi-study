@@ -229,6 +229,20 @@ const { Content } = await post.render();
     margin-bottom: 0.25rem;
   }
 
+  /* Feature box styling */
+  .post-content :global(.feature-box) {
+    background-color: #fffef6;
+    border: 1px solid #cfcfcf;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    line-height: 1.8;
+  }
+
+  .post-content :global(.feature-box) :global(p) {
+    margin-bottom: 0.5rem;
+  }
+
   /* Heading styles with borders */
   .post-content :global(h2) {
     border-left: 5px solid #205a97;
