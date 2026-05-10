@@ -37,5 +37,12 @@
   </data>
 </div>
 <script src="/kifPlayer/kifPlayer.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof kifPlayer !== 'undefined' && kifPlayer.スタートアップ) {
+    kifPlayer.スタートアップ();
+  }
+});
+</script>
 </body>
 </html>
