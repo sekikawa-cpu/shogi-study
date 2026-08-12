@@ -16,6 +16,7 @@ function buildRakutenLink(url: string): string {
   if (url.includes('hb.afl.rakuten.co.jp/hgc/')) {
     return url;
   }
+  if (!rakutenAffiliateId) return url;
   // 古い形式（アフィリエイトID未設定）の場合は l-id を追加
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}l-id=${rakutenAffiliateId}`;
@@ -35,13 +36,13 @@ function buildRakutenLink(url: string): string {
     {author && <p class="book-author">著者: {author}</p>}
     <div class="affiliate-buttons-group">
       {amazonUrl && (
-        <a href={amazonUrl} target="_blank" rel="noopener noreferrer" class="affiliate-btn amazon-btn">
+        <a href={amazonUrl} target="_blank" rel="noopener noreferrer sponsored" class="affiliate-btn amazon-btn">
           <span class="btn-icon">🛒</span>
           Amazonで購入
         </a>
       )}
       {rakutenUrl && (
-        <a href={buildRakutenLink(rakutenUrl)} target="_blank" rel="noopener noreferrer" class="affiliate-btn rakuten-btn">
+        <a href={buildRakutenLink(rakutenUrl)} target="_blank" rel="noopener noreferrer sponsored" class="affiliate-btn rakuten-btn">
           <span class="btn-icon">楽</span>
           楽天で購入
         </a>

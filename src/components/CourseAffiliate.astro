@@ -1,0 +1,51 @@
+---
+interface Props {
+  title: string;
+  courseUrl: string;
+  imageUrl?: string;
+  description?: string;
+}
+
+const { title, courseUrl, imageUrl, description } = Astro.props;
+const udemyAffiliateId = import.meta.env.UDEMY_AFFILIATE_ID;
+
+function buildUdemyLink(url: string): string {
+  if (!url || !udemyAffiliateId) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}referralCode=${udemyAffiliateId}`;
+}
+---
+
+<div class="course-affiliate-wrapper">
+  <p class="affiliate-disclosure">※本セクションにはアフィリエイト広告（PR）が含まれます</p>
+  <div class="course-affiliate-card">
+    {imageUrl && (
+      <div class="course-cover-container">
+        <img src={imageUrl} alt={title} class="course-cover" loading="lazy" />
+        <span class="course-platform">Udemy</span>
+      </div>
+    )}
+    <div class="course-details">
+      <h4 class="course-title">{title}</h4>
+      {description && <p class="course-description">{description}</p>}
+      <a href={buildUdemyLink(courseUrl)} target="_blank" rel="noopener noreferrer sponsored" class="course-btn">
+        <span aria-hidden="true">🎓</span> Udemyで講座を見る
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .course-affiliate-wrapper { margin: 2rem 0; }
+  .affiliate-disclosure { font-size: 0.78rem; color: #888; margin: 0 0 0.25rem; text-align: right; }
+  .course-affiliate-card { display: flex; gap: 1.5rem; padding: 1.5rem; border: 2px solid #e8e8e8; border-radius: 12px; background: linear-gradient(135deg, #f5f7ff, #f0f3ff); }
+  .course-cover-container { position: relative; flex-shrink: 0; display: flex; align-items: center; }
+  .course-cover { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+  .course-platform { position: absolute; top: 8px; right: 8px; background: #a435f0; color: #fff; padding: .35rem .7rem; border-radius: 4px; font-size: .75rem; font-weight: 600; }
+  .course-details { flex: 1; min-width: 0; }
+  .course-title { margin: 0 0 .75rem; font-size: 1.1rem; color: #222; line-height: 1.4; }
+  .course-description { margin: .5rem 0 1rem; font-size: .9rem; color: #666; line-height: 1.5; }
+  .course-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .8rem 1.5rem; background: linear-gradient(135deg, #a435f0, #8b2dd9); color: #fff; text-decoration: none; border-radius: 6px; font-size: .95rem; font-weight: 600; }
+  .course-btn:hover { color: #fff; text-decoration: none; background: linear-gradient(135deg, #8b2dd9, #7025b0); }
+  @media (max-width: 768px) { .course-affiliate-card { flex-direction: column; align-items: center; text-align: center; padding: 1rem; } .course-cover { width: 140px; height: 79px; } }
+</style>

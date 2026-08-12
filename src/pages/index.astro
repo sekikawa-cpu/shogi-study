@@ -113,18 +113,19 @@ const canonicalURL = new URL('/', Astro.site);
         margin-bottom: 1.5rem; background: linear-gradient(120deg, #1e293b, #0f172a);
         border-radius: 12px; color: #fff; overflow: hidden;
       }
-      .hero-inner { display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem 1.5rem; }
+      .hero-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 0.85rem 1.25rem; min-height: 88px; }
+      .hero-copy { min-width: 0; }
       .hero h1 { font-size: 1.15rem; margin: 0; font-weight: 800; }
-      .hero p { color: #94a3b8; font-size: 0.8rem; margin: 0.25rem 0 0; line-height: 1.6; }
-      .hero-pillars { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .hero p { color: #94a3b8; font-size: 0.78rem; margin: 0.2rem 0 0; line-height: 1.45; }
+      .hero-pillars { display: flex; gap: 0.4rem; flex-wrap: nowrap; flex-shrink: 0; }
       .hero-pillar {
-        display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
-        background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 0.75rem;
-        text-decoration: none; color: #fff; width: 4.2rem; text-align: center;
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        background: rgba(255,255,255,0.1); border-radius: 7px; padding: 0.45rem 0.65rem;
+        text-decoration: none; color: #fff; white-space: nowrap; text-align: center;
         transition: background 0.15s;
       }
       .hero-pillar:hover { background: rgba(255,255,255,0.2); }
-      .hero-pillar-icon { font-size: 1.3rem; line-height: 1; }
+      .hero-pillar-icon { font-size: 1rem; line-height: 1; }
       .hero-pillar-label { font-size: 0.7rem; font-weight: 700; }
 
       .featured-box { background: #fff; border-radius: 12px; border: 1px solid #dbeafe; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 2rem; }
@@ -188,6 +189,17 @@ const canonicalURL = new URL('/', Astro.site);
       .footer-nav a:hover { color: #60a5fa; }
       .site-footer p { font-size: 0.75rem; margin: 0; }
 
+      @media (max-width: 767px) {
+        .hero-inner { flex-direction: column; align-items: stretch; gap: 0.65rem; min-height: auto; }
+        .hero-pillars { flex-wrap: wrap; }
+        .hero-pillar {
+          flex: 1 1 calc(50% - 0.2rem);
+          min-width: 0;
+          justify-content: center;
+          white-space: normal;
+        }
+      }
+
       @media (min-width: 768px) {
         nav.desktop-nav { display: flex; }
         .menu-btn { display: none; }
@@ -238,7 +250,7 @@ const canonicalURL = new URL('/', Astro.site);
     <main class="home-main">
       <div class="hero">
         <div class="hero-inner">
-          <div>
+          <div class="hero-copy">
             <h1>{SITE_NAME}</h1>
             <p>{SITE_DESCRIPTION}</p>
           </div>
