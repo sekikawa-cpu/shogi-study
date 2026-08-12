@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORY_CONFIG, matchesCategory } from './category/[slug].astro';
 
-const PILLAR_SLUGS = ['shogi', 'ai-dx', 'shikaku', 'shigoto'] as const;
+const PILLAR_SLUGS = ['ai-dx', 'shikaku', 'shigoto', 'shogi'] as const;
 
 const allPosts = await getCollection('blog');
 const postsJson = JSON.stringify(allPosts.map((p) => {

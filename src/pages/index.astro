@@ -9,7 +9,7 @@ const allPosts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const PILLAR_SLUGS = ['shogi', 'ai-dx', 'shikaku', 'shigoto'] as const;
+const PILLAR_SLUGS = ['ai-dx', 'shikaku', 'shigoto', 'shogi'] as const;
 
 const postsByPillar: Record<string, typeof allPosts> = {};
 PILLAR_SLUGS.forEach((slug) => {
@@ -19,10 +19,10 @@ PILLAR_SLUGS.forEach((slug) => {
 const popularPosts = allPosts.slice(0, 5);
 
 const FEATURED_SLUGS: { slug: string; pillar: (typeof PILLAR_SLUGS)[number] }[] = [
-  { slug: 'journey-to-first-dan', pillar: 'shogi' },
   { slug: 'hallucination-ai-lesson', pillar: 'ai-dx' },
   { slug: 'naze-shikaku-tori-tsuzukeru', pillar: 'shikaku' },
   { slug: 'tensyoku-nensyu-agaru-soshiki-bunka', pillar: 'shigoto' },
+  { slug: 'journey-to-first-dan', pillar: 'shogi' },
 ];
 const featuredPosts = FEATURED_SLUGS
   .map(({ slug, pillar }) => {

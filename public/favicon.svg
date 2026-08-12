@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3182ce;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="192" height="192" fill="url(#grad)" rx="40"/>
+
+  <!-- 開いた本（日記/ブログ） -->
+  <path d="M 40 60 Q 40 52 48 52 L 92 52 L 92 138 L 48 138 Q 40 138 40 130 Z"
+        fill="none" stroke="white" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M 152 60 Q 152 52 144 52 L 100 52 L 100 138 L 144 138 Q 152 138 152 130 Z"
+        fill="none" stroke="white" stroke-width="8" stroke-linejoin="round"/>
+  <line x1="96" y1="52" x2="96" y2="138" stroke="white" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- ページの線 -->
+  <line x1="52" y1="75" x2="82" y2="75" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <line x1="52" y1="90" x2="82" y2="90" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <line x1="110" y1="75" x2="140" y2="75" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <line x1="110" y1="90" x2="140" y2="90" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+</svg>

@@ -3,11 +3,6 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const CATEGORY_CONFIG = {
-  shogi: {
-    label: '将棋',
-    icon: '♔',
-    description: '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等。',
-  },
   'ai-dx': {
     label: 'AI・DX',
     icon: '🤖',
@@ -22,6 +17,11 @@ export const CATEGORY_CONFIG = {
     label: '仕事術・キャリア形成',
     icon: '💼',
     description: 'DX推進の現場で感じた壁や気づき、キャリア形成にまつわる実体験。',
+  },
+  shogi: {
+    label: '将棋',
+    icon: '歩',
+    description: '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等。',
   },
 };
 
