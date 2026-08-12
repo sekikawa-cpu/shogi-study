@@ -14,6 +14,7 @@ const postsJson = JSON.stringify(allPosts.map((p) => {
     description: p.data.description ?? '',
     pillar,
     icon: CATEGORY_CONFIG[pillar].icon,
+    iconImage: CATEGORY_CONFIG[pillar].iconImage ?? '',
     label: CATEGORY_CONFIG[pillar].label,
     tags: p.data.tags ?? [],
     pubDate: p.data.pubDate.toLocaleDateString('ja-JP'),
@@ -54,16 +55,19 @@ const postsJson = JSON.stringify(allPosts.map((p) => {
       noResult.classList.add('hidden');
 
       filtered.forEach((p) => {
+        const categoryIconHtml = p.iconImage
+          ? `<img src="${p.iconImage}" alt="" class="result-category-icon">`
+          : p.icon;
         const thumbHtml = p.heroImage
           ? `<img src="${p.heroImage}" alt="${p.title.replace(/"/g, '&quot;')}" class="result-thumb">`
-          : `<div class="result-thumb-fallback">${p.icon}</div>`;
+          : `<div class="result-thumb-fallback">${categoryIconHtml}</div>`;
 
         grid.innerHTML += `
           <a href="/blog/${p.slug}" class="result-card">
             ${thumbHtml}
             <div class="result-body">
               <div class="result-meta">
-                <span class="result-badge">${p.icon} ${p.label}</span>
+                <span class="result-badge">${categoryIconHtml} ${p.label}</span>
                 <span class="result-date">${p.pubDate}</span>
               </div>
               <h3 class="result-title">${p.title}</h3>
@@ -155,6 +159,7 @@ const postsJson = JSON.stringify(allPosts.map((p) => {
   .result-title { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.4; }
   .result-desc { font-size: 0.78rem; color: #64748b; margin: 0 0 0.5rem; }
   .result-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; }
+  :global(.result-category-icon) { width: 1.25em; height: 1.45em; object-fit: contain; vertical-align: middle; }
   .hidden { display: none; }
   .no-result { text-align: center; padding: 3rem 0; color: #718096; }
   .no-result-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }

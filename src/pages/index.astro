@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { CATEGORY_CONFIG, matchesCategory } from './category/[slug].astro';
+import CategoryIcon from '../components/CategoryIcon.astro';
 
 const SITE_NAME = 'ただの会社員の生活日記';
 const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
@@ -211,7 +212,7 @@ const canonicalURL = new URL('/', Astro.site);
       </div>
       {PILLAR_SLUGS.map((slug) => (
         <a class="drawer-cat-item" href={`/category/${slug}/`}>
-          <span>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</span>
+          <span class="category-label"><CategoryIcon icon={CATEGORY_CONFIG[slug].icon} iconImage={CATEGORY_CONFIG[slug].iconImage} /> {CATEGORY_CONFIG[slug].label}</span>
           {postsByPillar[slug].length > 0 && <span class="cat-badge">{postsByPillar[slug].length}</span>}
         </a>
       ))}
@@ -225,7 +226,7 @@ const canonicalURL = new URL('/', Astro.site);
         <a href="/" class="logo">{SITE_NAME}</a>
         <nav class="desktop-nav">
           {PILLAR_SLUGS.map((slug) => (
-            <a href={`/category/${slug}/`}>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</a>
+            <a href={`/category/${slug}/`}><CategoryIcon icon={CATEGORY_CONFIG[slug].icon} iconImage={CATEGORY_CONFIG[slug].iconImage} /> {CATEGORY_CONFIG[slug].label}</a>
           ))}
           <a href="/about/">👤 プロフィール</a>
           <a href="/contact/">✉ お問い合わせ</a>
@@ -244,7 +245,7 @@ const canonicalURL = new URL('/', Astro.site);
           <div class="hero-pillars">
             {PILLAR_SLUGS.map((slug) => (
               <a class="hero-pillar" href={`/category/${slug}/`}>
-                <span class="hero-pillar-icon">{CATEGORY_CONFIG[slug].icon}</span>
+                <CategoryIcon icon={CATEGORY_CONFIG[slug].icon} iconImage={CATEGORY_CONFIG[slug].iconImage} class="hero-pillar-icon" />
                 <span class="hero-pillar-label">{CATEGORY_CONFIG[slug].label}</span>
               </a>
             ))}
@@ -262,10 +263,10 @@ const canonicalURL = new URL('/', Astro.site);
               {post.data.heroImage ? (
                 <img class="featured-thumb" src={post.data.heroImage} alt={post.data.title} />
               ) : (
-                <div class="featured-thumb-fallback">{CATEGORY_CONFIG[pillar].icon}</div>
+                <div class="featured-thumb-fallback"><CategoryIcon icon={CATEGORY_CONFIG[pillar].icon} iconImage={CATEGORY_CONFIG[pillar].iconImage} /></div>
               )}
               <div class="featured-body">
-                <span class="featured-badge">{CATEGORY_CONFIG[pillar].icon} {CATEGORY_CONFIG[pillar].label}</span>
+                <span class="featured-badge"><CategoryIcon icon={CATEGORY_CONFIG[pillar].icon} iconImage={CATEGORY_CONFIG[pillar].iconImage} /> {CATEGORY_CONFIG[pillar].label}</span>
                 <p class="featured-title">{post.data.title}</p>
                 <p class="featured-desc">{post.data.description}</p>
               </div>
@@ -283,7 +284,7 @@ const canonicalURL = new URL('/', Astro.site);
             return (
               <section class="pillar-section">
                 <div class="pillar-heading">
-                  <span class="pillar-heading-left"><span>{cfg.icon}</span><span>{cfg.label}</span></span>
+                  <span class="pillar-heading-left"><CategoryIcon icon={cfg.icon} iconImage={cfg.iconImage} /><span>{cfg.label}</span></span>
                   <a class="more" href={`/category/${slug}/`}>すべて見る（{sectionPosts.length}件）→</a>
                 </div>
                 {displayPosts.length === 0 ? (
@@ -295,11 +296,11 @@ const canonicalURL = new URL('/', Astro.site);
                         {post.data.heroImage ? (
                           <img class="pillar-card-thumb" src={post.data.heroImage} alt={post.data.title} />
                         ) : (
-                          <div class="pillar-card-thumb-fallback">{cfg.icon}</div>
+                          <div class="pillar-card-thumb-fallback"><CategoryIcon icon={cfg.icon} iconImage={cfg.iconImage} /></div>
                         )}
                         <div class="pillar-card-body">
                           <div class="pillar-card-meta">
-                            <span class="featured-badge">{cfg.icon} {cfg.label}</span>
+                            <span class="featured-badge"><CategoryIcon icon={cfg.icon} iconImage={cfg.iconImage} /> {cfg.label}</span>
                             <span class="pillar-card-date">{post.data.pubDate.toLocaleDateString('ja-JP')}</span>
                           </div>
                           <p class="pillar-card-title">{post.data.title}</p>
@@ -353,7 +354,7 @@ const canonicalURL = new URL('/', Astro.site);
             <div>
               {PILLAR_SLUGS.map((slug) => (
                 <a class="cat-widget-item" href={`/category/${slug}/`}>
-                  <span>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</span>
+                  <span class="category-label"><CategoryIcon icon={CATEGORY_CONFIG[slug].icon} iconImage={CATEGORY_CONFIG[slug].iconImage} /> {CATEGORY_CONFIG[slug].label}</span>
                   <span class="cat-badge">{postsByPillar[slug].length}</span>
                 </a>
               ))}
@@ -367,7 +368,7 @@ const canonicalURL = new URL('/', Astro.site);
       <nav class="footer-nav">
         <a href="/">ホーム</a>
         {PILLAR_SLUGS.map((slug) => (
-          <a href={`/category/${slug}/`}>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</a>
+          <a href={`/category/${slug}/`}><CategoryIcon icon={CATEGORY_CONFIG[slug].icon} iconImage={CATEGORY_CONFIG[slug].iconImage} /> {CATEGORY_CONFIG[slug].label}</a>
         ))}
         <a href="/about/">プロフィール</a>
         <a href="/contact/">お問い合わせ</a>

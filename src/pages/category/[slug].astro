@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryIcon from '../../components/CategoryIcon.astro';
 
 export const CATEGORY_CONFIG = {
   'ai-dx': {
@@ -21,6 +22,7 @@ export const CATEGORY_CONFIG = {
   shogi: {
     label: '将棋',
     icon: '歩',
+    iconImage: '/images/icons/shogi-piece.svg',
     description: '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等。',
   },
 };
@@ -51,7 +53,10 @@ const posts = allPosts
 
 <BaseLayout title={cfg.label} description={cfg.description}>
   <article>
-    <h1>{cfg.icon} {cfg.label}</h1>
+    <h1 class="category-title">
+      <CategoryIcon icon={cfg.icon} iconImage={cfg.iconImage} class="category-title-icon" />
+      <span>{cfg.label}</span>
+    </h1>
     <p class="category-description">{cfg.description}</p>
 
     {posts.length === 0 ? (
@@ -60,6 +65,12 @@ const posts = allPosts
       <div class="posts-list">
         {posts.map((post) => (
           <div class="post-item">
+            {post.data.heroImage && (
+              <a href={`/blog/${post.slug}`} class="post-thumb-link" tabindex="-1" aria-hidden="true">
+                <img src={post.data.heroImage} alt="" class="post-thumb" loading="lazy" />
+              </a>
+            )}
+            <div class="post-body">
             <h2>
               <a href={`/blog/${post.slug}`}>{post.data.title}</a>
             </h2>
@@ -84,6 +95,7 @@ const posts = allPosts
               </div>
             )}
             <a href={`/blog/${post.slug}`} class="read-more">記事を読む →</a>
+            </div>
           </div>
         ))}
       </div>
@@ -97,6 +109,12 @@ const posts = allPosts
     margin-bottom: 2rem;
   }
 
+  .category-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
   .posts-list {
     display: flex;
     flex-direction: column;
@@ -108,7 +126,15 @@ const posts = allPosts
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     transition: all 0.2s;
+    display: grid;
+    grid-template-columns: minmax(180px, 32%) 1fr;
+    gap: 1.5rem;
+    align-items: start;
   }
+
+  .post-thumb-link { display: block; }
+  .post-thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; display: block; }
+  .post-body { min-width: 0; }
 
   .post-item:hover {
     border-color: #3182ce;
@@ -180,5 +206,9 @@ const posts = allPosts
   .read-more:hover {
     color: #1a365d;
     text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .post-item { grid-template-columns: 1fr; }
   }
 </style>

@@ -2,12 +2,13 @@
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
 const SITE_NAME = 'ただの会社員の生活日記';
 const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
 
-const { title = '', description = SITE_DESCRIPTION } = Astro.props;
+const { title = '', description = SITE_DESCRIPTION, image = '/images/profile.png' } = Astro.props;
 const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -29,7 +30,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content={SITE_NAME} />
-    <meta property="og:image" content={new URL('/images/profile.png', Astro.site)} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
@@ -76,7 +77,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             <li class="nav-category"><a href="/category/ai-dx/">🤖 AI・DX</a></li>
             <li class="nav-category"><a href="/category/shikaku/">📖 資格・学習</a></li>
             <li class="nav-category"><a href="/category/shigoto/">💼 仕事術</a></li>
-            <li class="nav-category"><a href="/category/shogi/">歩 将棋</a></li>
+            <li class="nav-category"><a href="/category/shogi/"><img src="/images/icons/shogi-piece.svg" alt="" class="shogi-nav-icon" /> 将棋</a></li>
             <li class="nav-category"><a href="/about/">👤 プロフィール</a></li>
             <li class="nav-category"><a href="/contact/">✉ お問い合わせ</a></li>
           </ul>
@@ -110,7 +111,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
               <li><a href="/category/ai-dx/">🤖 AI・DX</a></li>
               <li><a href="/category/shikaku/">📖 資格・学習</a></li>
               <li><a href="/category/shigoto/">💼 仕事術</a></li>
-              <li><a href="/category/shogi/">歩 将棋</a></li>
+              <li><a href="/category/shogi/"><img src="/images/icons/shogi-piece.svg" alt="" class="shogi-nav-icon" /> 将棋</a></li>
             </ul>
           </div>
         </aside>
@@ -272,7 +273,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         color: var(--primary-color);
         border-bottom: 3px solid transparent;
         transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
       }
+
+      .shogi-nav-icon { width: 20px; height: 24px; object-fit: contain; vertical-align: middle; flex: 0 0 auto; }
 
       .nav-category > a:hover {
         color: var(--accent-color);
@@ -359,6 +365,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         color: #3182ce;
         font-weight: 500;
         transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
       }
 
       .category-list a:hover {
