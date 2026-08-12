@@ -9,6 +9,8 @@ const blog = defineCollection({
     description: z.string().optional(),
     categories: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
+    section: z.enum(['shogi', 'ai-dx']).default('shogi'),
+    heroImage: z.string().optional(),
   }),
 });
 

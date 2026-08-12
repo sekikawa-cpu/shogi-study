@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const title = '悠人の四間飛車党将棋ブログ';
 const description = '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等を書いています。';
 
-const allPosts = await getCollection('blog');
+const allPosts = await getCollection('blog', ({ data }) => data.section === 'shogi');
 const recentPosts = allPosts
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 5);
