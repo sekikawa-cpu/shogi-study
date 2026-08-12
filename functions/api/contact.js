@@ -32,7 +32,7 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         from: 'お問い合わせフォーム <onboarding@resend.dev>',
-        to: ['sekikawa0301@gmail.com'],
+        to: ['sekijun0301@gmail.com'],
         reply_to: email,
         subject: `[お問い合わせ] ${subject}`,
         text: `お名前: ${name}\nメールアドレス: ${email}\n件名: ${subject}\n\nメッセージ:\n${message}`,
