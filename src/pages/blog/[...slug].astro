@@ -153,6 +153,82 @@ const isShogiPost = post.data.heroImage?.startsWith('/images/shogi/');
     margin: 1.5rem 0;
   }
 
+  /* 記事内のMarkdown表を共通デザインに統一 */
+  .post-content :global(table:not(.article-data-table)) {
+    width: 100%;
+    min-width: 600px;
+    margin: 1.25rem 0 1.75rem;
+    border: 1px solid #cbd5e1;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .post-content :global(table:not(.article-data-table) th),
+  .post-content :global(table:not(.article-data-table) td) {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .post-content :global(table:not(.article-data-table) tr > :last-child) {
+    border-right: 0;
+  }
+
+  .post-content :global(table:not(.article-data-table) tbody tr:last-child > *) {
+    border-bottom: 0;
+  }
+
+  .post-content :global(table:not(.article-data-table) thead th) {
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  }
+
+  .post-content :global(table:not(.article-data-table) tbody th) {
+    color: #0f172a;
+    font-weight: 700;
+    background: #f8fafc;
+  }
+
+  .post-content :global(table:not(.article-data-table) tbody tr:nth-child(even) td) {
+    background: #f8fafc;
+  }
+
+  .post-content :global(table:not(.article-data-table) tbody tr:hover > *) {
+    background: #eff6ff;
+  }
+
+  .post-content :global(table:not(.article-data-table) strong) {
+    color: #1e3a8a;
+    font-weight: 700;
+  }
+
+  @media (max-width: 768px) {
+    .post-content :global(table:not(.article-data-table)) {
+      display: block;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      white-space: nowrap;
+    }
+
+    .post-content :global(table:not(.article-data-table) th),
+    .post-content :global(table:not(.article-data-table) td) {
+      padding: 0.7rem 0.8rem;
+    }
+  }
+
   .post-content :global(blockquote) {
     border-left: 4px solid #3182ce;
     padding-left: 1rem;
