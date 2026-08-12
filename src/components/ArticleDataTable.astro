@@ -1,0 +1,133 @@
+---
+interface Props {
+  headers: string[];
+  rows: string[][];
+  minWidth?: string;
+  highlightRows?: number[];
+  numericFrom?: number;
+  numericColumns?: number[];
+}
+
+const {
+  headers,
+  rows,
+  minWidth = '640px',
+  highlightRows = [],
+  numericFrom = Number.POSITIVE_INFINITY,
+  numericColumns = [],
+} = Astro.props;
+---
+
+<div class="article-table-scroll" role="region" aria-label={`${headers[0]}の比較表`} tabindex="0">
+  <table class="article-data-table" style={`--table-min-width: ${minWidth}`}>
+    <thead>
+      <tr>
+        {headers.map((header, index) => (
+          <th scope="col" class:list={{ numeric: index >= numericFrom || numericColumns.includes(index) }}>{header}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, rowIndex) => (
+        <tr class:list={{ highlighted: highlightRows.includes(rowIndex) }}>
+          {row.map((cell, cellIndex) => cellIndex === 0 ? (
+            <th scope="row">{cell}</th>
+          ) : (
+            <td class:list={{ numeric: cellIndex >= numericFrom || numericColumns.includes(cellIndex) }}>{cell}</td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .article-table-scroll {
+    max-width: 100%;
+    margin: 1.25rem 0 1.75rem;
+    overflow-x: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+    scrollbar-color: #94a3b8 #e2e8f0;
+  }
+
+  .article-table-scroll:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.3);
+    outline-offset: 2px;
+  }
+
+  .article-data-table {
+    width: 100%;
+    min-width: var(--table-min-width);
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  th,
+  td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th:last-child,
+  td:last-child {
+    border-right: 0;
+  }
+
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  thead th {
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  }
+
+  tbody th {
+    color: #0f172a;
+    font-weight: 700;
+    background: #f8fafc;
+  }
+
+  tbody tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  tbody tr:hover > * {
+    background: #eff6ff;
+  }
+
+  tbody tr.highlighted > * {
+    color: #14532d;
+    font-weight: 700;
+    background: #dcfce7;
+  }
+
+  .numeric {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .article-table-scroll {
+      margin-right: -0.25rem;
+      margin-left: -0.25rem;
+      border-radius: 9px;
+    }
+
+    th,
+    td {
+      padding: 0.7rem 0.8rem;
+    }
+  }
+</style>
