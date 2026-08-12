@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -15,7 +16,8 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
+const isShogiPost = post.data.heroImage?.startsWith('/images/shogi/');
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description || ''} image={post.data.heroImage}>
@@ -49,6 +51,9 @@ const { Content } = await post.render();
     )}
 
     <div class="post-content">
+      {isShogiPost && (
+        <TableOfContents headings={headings.filter((heading: any) => heading.depth === 2 || heading.depth === 3)} />
+      )}
       <Content />
     </div>
 

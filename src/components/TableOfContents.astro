@@ -1,0 +1,42 @@
+---
+interface Heading {
+  depth: 2 | 3;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+---
+
+{headings.length > 0 && (
+  <nav class="article-toc" aria-label="記事の目次">
+    <p class="article-toc-title">目次</p>
+    <ol>
+      {headings.map((heading) => (
+        <li class:list={[heading.depth === 3 && 'article-toc-child']}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .article-toc {
+    margin: 1.5rem 0 2rem;
+    padding: 1.15rem 1.35rem;
+    border: 1px solid #d7dce2;
+    border-radius: 8px;
+    background: #fffef8;
+  }
+  .article-toc-title { margin: 0 0 0.65rem; font-weight: 800; color: #1e3a5f; }
+  .article-toc ol { margin: 0; padding-left: 1.35rem; }
+  .article-toc li { margin: 0.35rem 0; line-height: 1.55; }
+  .article-toc-child { margin-left: 1.2rem; font-size: 0.94em; list-style-type: circle; }
+  .article-toc a { color: #2563a9; text-decoration: none; }
+  .article-toc a:hover { text-decoration: underline; }
+</style>
