@@ -1,0 +1,173 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="お問い合わせ"
+  description="ただの会社員の生活日記へのお問い合わせページです。ご質問・ご意見・ご要望はこちらからどうぞ。通常2〜3営業日以内にご返信いたします。"
+>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "url": "https://shogi-study.com/contact/",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ただの会社員の生活日記",
+      "url": "https://shogi-study.com",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "url": "https://shogi-study.com/contact/"
+      }
+    }
+  })} />
+
+  <article>
+    <h1>お問い合わせ</h1>
+    <p>ご質問・ご意見・ご要望がございましたら、以下のフォームよりお送りください。通常2〜3営業日以内にご返信いたします。</p>
+
+    <div class="notice">
+      ※ 記事の内容に関するご意見・誤りのご指摘は歓迎いたします。<br>
+      ※ 個別の専門的な診断・アドバイスには対応しておりません。
+    </div>
+
+    <div id="form-success" class="hidden success-box">
+      <p><strong>送信が完了しました！</strong></p>
+      <p>お問い合わせありがとうございます。通常2〜3営業日以内にご返信いたします。</p>
+    </div>
+
+    <div id="form-error" class="hidden error-box">
+      <p id="form-error-msg">送信に失敗しました。時間をおいて再度お試しください。</p>
+    </div>
+
+    <form id="contact-form" novalidate class="contact-form">
+      <div class="field">
+        <label for="name">お名前 <span class="required">*</span></label>
+        <input type="text" id="name" name="name" required placeholder="山田 太郎" />
+      </div>
+      <div class="field">
+        <label for="email">メールアドレス <span class="required">*</span></label>
+        <input type="email" id="email" name="email" required placeholder="your@example.com" />
+      </div>
+      <div class="field">
+        <label for="subject">件名</label>
+        <input type="text" id="subject" name="subject" placeholder="例：記事の内容について" />
+      </div>
+      <div class="field">
+        <label for="message">メッセージ <span class="required">*</span></label>
+        <textarea id="message" name="message" required rows="6" placeholder="お問い合わせ内容をご記入ください。"></textarea>
+      </div>
+      <button type="submit" id="submit-btn">
+        <span id="submit-label">送信する</span>
+      </button>
+    </form>
+  </article>
+
+  <script>
+    const form = document.getElementById('contact-form') as HTMLFormElement;
+    const btn  = document.getElementById('submit-btn') as HTMLButtonElement;
+    const label   = document.getElementById('submit-label')!;
+    const success = document.getElementById('form-success')!;
+    const errBox  = document.getElementById('form-error')!;
+    const errMsg  = document.getElementById('form-error-msg')!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name    = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
+      const email   = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+      const message = (form.elements.namedItem('message') as HTMLTextAreaElement).value.trim();
+      if (!name || !email || !message) {
+        showError('お名前・メールアドレス・メッセージは必須項目です。');
+        return;
+      }
+
+      btn.disabled = true;
+      label.textContent = '送信中...';
+      errBox.classList.add('hidden');
+
+      try {
+        const data = new FormData(form);
+        const res  = await fetch('/api/contact', { method: 'POST', body: data });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          form.classList.add('hidden');
+          success.classList.remove('hidden');
+        } else {
+          showError(json.error || '送信に失敗しました。時間をおいて再度お試しください。');
+        }
+      } catch {
+        showError('送信に失敗しました。ネットワーク接続を確認してください。');
+      } finally {
+        btn.disabled = false;
+        label.textContent = '送信する';
+      }
+    });
+
+    function showError(msg: string) {
+      errMsg.textContent = msg;
+      errBox.classList.remove('hidden');
+      errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .notice {
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1.1rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #475569;
+  }
+  .hidden { display: none; }
+  .success-box {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    text-align: center;
+    color: #166534;
+  }
+  .error-box {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
+  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .required { color: #dc2626; }
+  .field input, .field textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  }
+  button[type="submit"] {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button[type="submit"]:hover { background: #1d4ed8; }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+</style>

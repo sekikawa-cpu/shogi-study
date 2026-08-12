@@ -2,12 +2,12 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog', ({ data }) => data.section === 'shogi')).sort(
+const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 ---
 
-<BaseLayout title="ブログ" description="四間飛車に関する将棋ブログの記事一覧">
+<BaseLayout title="全記事一覧" description="将棋・AI/DX・資格学習・仕事術など、全カテゴリの記事一覧です。">
   <article>
     <h1>ブログ記事一覧</h1>
 

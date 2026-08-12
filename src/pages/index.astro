@@ -1,150 +1,395 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import { CATEGORY_CONFIG, matchesCategory } from './category/[slug].astro';
 
-const title = '悠人の四間飛車党将棋ブログ';
-const description = '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等を書いています。';
+const SITE_NAME = 'ただの会社員の生活日記';
+const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
 
-const allPosts = await getCollection('blog', ({ data }) => data.section === 'shogi');
-const recentPosts = allPosts
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 5);
+const allPosts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const PILLAR_SLUGS = ['shogi', 'ai-dx', 'shikaku', 'shigoto'] as const;
+
+const postsByPillar: Record<string, typeof allPosts> = {};
+PILLAR_SLUGS.forEach((slug) => {
+  postsByPillar[slug] = allPosts.filter((p) => matchesCategory(slug, p.data));
+});
+
+const popularPosts = allPosts.slice(0, 5);
+
+const FEATURED_SLUGS: { slug: string; pillar: (typeof PILLAR_SLUGS)[number] }[] = [
+  { slug: 'journey-to-first-dan', pillar: 'shogi' },
+  { slug: 'hallucination-ai-lesson', pillar: 'ai-dx' },
+  { slug: 'naze-shikaku-tori-tsuzukeru', pillar: 'shikaku' },
+  { slug: 'tensyoku-nensyu-agaru-soshiki-bunka', pillar: 'shigoto' },
+];
+const featuredPosts = FEATURED_SLUGS
+  .map(({ slug, pillar }) => {
+    const post = allPosts.find((p) => p.slug === slug);
+    return post ? { post, pillar } : null;
+  })
+  .filter((x): x is { post: (typeof allPosts)[number]; pillar: (typeof PILLAR_SLUGS)[number] } => x !== null);
+
+const canonicalURL = new URL('/', Astro.site);
 ---
 
-<BaseLayout title={title} description={description}>
-  <div class="home">
-    <h1>{title}</h1>
-    <p class="tagline">{description}</p>
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{SITE_NAME}</title>
+    <meta name="description" content={SITE_DESCRIPTION} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={SITE_NAME} />
+    <meta property="og:description" content={SITE_DESCRIPTION} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:image" content={new URL('/images/profile.png', Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={SITE_NAME} />
+    <meta name="twitter:description" content={SITE_DESCRIPTION} />
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-7499855875738477">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7499855875738477"
+     crossorigin="anonymous"></script>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": SITE_NAME,
+      "url": String(Astro.site),
+      "description": SITE_DESCRIPTION,
+      "publisher": {
+        "@type": "Organization",
+        "name": SITE_NAME,
+        "url": String(Astro.site),
+        "logo": { "@type": "ImageObject", "url": new URL('/images/profile.png', Astro.site) }
+      }
+    })} />
+    <style>
+      body { margin: 0; font-family: 'Noto Sans JP', sans-serif; color: #1e293b; background: #f8fafc; }
+      a { color: inherit; }
+      .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+      .drawer-overlay.open { display: block; }
+      .drawer {
+        position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+        background: #fff; z-index: 50; transition: right 0.3s ease; overflow-y: auto;
+        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      }
+      .drawer.open { right: 0; }
+      .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: #0f172a; color: #fff; }
+      .drawer-header button { background: none; border: none; color: #fff; font-weight: 700; cursor: pointer; }
+      .drawer-cat-item {
+        display: flex; justify-content: space-between; padding: 0.75rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9; text-decoration: none; color: #1e293b;
+        font-size: 0.9rem; font-weight: 500; transition: background 0.15s;
+      }
+      .drawer-cat-item:hover { background: #eff6ff; color: #2563eb; }
 
-    <section class="about">
-      <h2>このブログについて</h2>
-      <p>四間飛車党による将棋ブログです。戦型対策、棋書レビュー、将棋ソフト・アプリの紹介など、四間飛車に関するコンテンツを中心に扱っています。</p>
-    </section>
+      header.site-header { background: #0f172a; color: #fff; padding: 0.75rem 0; position: sticky; top: 0; z-index: 30; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+      .header-inner { max-width: 1152px; margin: 0 auto; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .logo { color: #fff; text-decoration: none; font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
+      nav.desktop-nav { display: none; gap: 0.25rem; margin-left: 0.5rem; }
+      nav.desktop-nav a {
+        color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.78rem; font-weight: 600;
+        padding: 0.4rem 0.6rem; border-radius: 4px; white-space: nowrap; transition: background 0.15s, color 0.15s;
+      }
+      nav.desktop-nav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+      .menu-btn {
+        background: #fff; color: #334155; border: 1px solid #e2e8f0; border-radius: 8px;
+        padding: 0.45rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      }
 
-    <section class="recent-posts">
-      <h2>最新の記事</h2>
-      {recentPosts.length === 0 ? (
-        <p>記事はまだ投稿されていません。</p>
-      ) : (
-        <ul class="posts-list">
-          {recentPosts.map((post) => (
-            <li>
-              <a href={`/blog/${post.slug}`} class="post-link">
-                <span class="post-date">
-                  {post.data.pubDate.toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })}
-                </span>
-                <span class="post-title">{post.data.title}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div class="view-all">
-        <a href="/blog" class="view-all-link">すべての記事を見る →</a>
+      main.home-main { max-width: 1152px; margin: 0 auto; padding: 2rem 1rem; }
+
+      .hero {
+        margin-bottom: 1.5rem; background: linear-gradient(120deg, #1e293b, #0f172a);
+        border-radius: 12px; color: #fff; overflow: hidden;
+      }
+      .hero-inner { display: flex; flex-direction: column; gap: 0.75rem; padding: 1.25rem 1.5rem; }
+      .hero h1 { font-size: 1.15rem; margin: 0; font-weight: 800; }
+      .hero p { color: #94a3b8; font-size: 0.8rem; margin: 0.25rem 0 0; line-height: 1.6; }
+      .hero-pillars { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .hero-pillar {
+        display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+        background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 0.75rem;
+        text-decoration: none; color: #fff; width: 4.2rem; text-align: center;
+        transition: background 0.15s;
+      }
+      .hero-pillar:hover { background: rgba(255,255,255,0.2); }
+      .hero-pillar-icon { font-size: 1.3rem; line-height: 1; }
+      .hero-pillar-label { font-size: 0.7rem; font-weight: 700; }
+
+      .featured-box { background: #fff; border-radius: 12px; border: 1px solid #dbeafe; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 2rem; }
+      .featured-header { background: linear-gradient(90deg, #2563eb, #1d4ed8); padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+      .featured-header h2 { color: #fff; font-size: 0.95rem; margin: 0; }
+      .featured-grid { display: grid; grid-template-columns: 1fr; }
+      .featured-item { display: flex; flex-direction: column; text-decoration: none; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+      .featured-item:last-child { border-bottom: none; }
+      .featured-item:hover { background: #f8fafc; }
+      .featured-thumb { width: 100%; height: 130px; object-fit: cover; }
+      .featured-thumb-fallback { width: 100%; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
+      .featured-body { padding: 1rem 1.25rem; }
+      .featured-badge { font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 9999px; background: #dbeafe; color: #1d4ed8; }
+      .featured-title { font-size: 0.88rem; font-weight: 700; color: #0f172a; margin: 0.5rem 0 0.35rem; line-height: 1.4; }
+      .featured-desc { font-size: 0.76rem; color: #64748b; margin: 0; }
+
+      .layout-grid { display: flex; flex-direction: column; gap: 2rem; }
+      .pillar-section { margin-bottom: 2rem; }
+      .pillar-heading { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #cbd5e1; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+      .pillar-heading-left { display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem; font-weight: 700; }
+      .pillar-heading a.more { font-size: 0.75rem; font-weight: 400; text-decoration: none; }
+      .pillar-cards { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+      .pillar-card { display: block; text-decoration: none; background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; transition: box-shadow 0.15s, transform 0.15s; }
+      .pillar-card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.08); transform: translateY(-2px); }
+      .pillar-card-thumb { width: 100%; height: 130px; object-fit: cover; display: block; }
+      .pillar-card-thumb-fallback { width: 100%; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
+      .pillar-card-body { padding: 1rem; }
+      .pillar-card-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+      .pillar-card-date { font-size: 0.7rem; color: #94a3b8; }
+      .pillar-card-title { font-size: 0.85rem; font-weight: 700; color: #0f172a; margin: 0 0 0.35rem; line-height: 1.4; }
+      .pillar-card-desc { font-size: 0.75rem; color: #64748b; margin: 0 0 0.5rem; }
+      .pillar-card-read { font-size: 0.72rem; font-weight: 700; }
+      .pillar-empty { color: #94a3b8; font-size: 0.85rem; padding: 1.5rem; text-align: center; border: 1px dashed #e2e8f0; border-radius: 8px; }
+
+      .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+      .widget { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; }
+      .widget-title { background: #1e293b; color: #fff; padding: 0.55rem 1rem; font-weight: 700; font-size: 0.85rem; }
+      .widget-body { padding: 1rem; }
+      .profile-widget { text-align: center; padding: 1.25rem 1rem; }
+      .profile-photo { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.6rem; border: 2px solid #bfdbfe; }
+      .profile-name { font-weight: 700; color: #0f172a; margin: 0 0 0.4rem; }
+      .profile-bio { font-size: 0.78rem; color: #64748b; text-align: left; line-height: 1.6; margin: 0 0 0.6rem; }
+      .profile-link { font-size: 0.75rem; font-weight: 700; text-decoration: none; }
+      .search-form { display: flex; }
+      .search-form input { flex: 1; border: 1px solid #cbd5e1; border-radius: 4px 0 0 4px; padding: 0.5rem 0.6rem; font-size: 0.85rem; }
+      .search-form button { border: none; background: #2563eb; color: #fff; padding: 0 0.9rem; border-radius: 0 4px 4px 0; font-weight: 700; cursor: pointer; }
+      .popular-item { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; text-decoration: none; color: inherit; }
+      .popular-item:last-child { border-bottom: none; }
+      .popular-rank { min-width: 1.4rem; height: 1.4rem; background: #94a3b8; color: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.72rem; flex-shrink: 0; }
+      .popular-rank.r1 { background: #f59e0b; }
+      .popular-rank.r2 { background: #94a3b8; }
+      .popular-rank.r3 { background: #b45309; }
+      .popular-title { font-size: 0.78rem; color: #334155; line-height: 1.4; }
+      .cat-widget-item { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 1rem; border-bottom: 1px solid #f1f5f9; text-decoration: none; font-size: 0.82rem; font-weight: 600; color: #334155; }
+      .cat-widget-item:last-child { border-bottom: none; }
+      .cat-badge { background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 9999px; }
+
+      footer.site-footer { background: #0f172a; color: #94a3b8; text-align: center; padding: 2rem 1rem; margin-top: 2rem; }
+      .footer-nav { display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #1e293b; }
+      .footer-nav a { color: #94a3b8; text-decoration: none; font-size: 0.78rem; }
+      .footer-nav a:hover { color: #60a5fa; }
+      .site-footer p { font-size: 0.75rem; margin: 0; }
+
+      @media (min-width: 768px) {
+        nav.desktop-nav { display: flex; }
+        .menu-btn { display: none; }
+        .featured-grid { grid-template-columns: repeat(4, 1fr); }
+        .featured-item { border-bottom: none; border-right: 1px solid #f1f5f9; }
+        .featured-item:last-child { border-right: none; }
+        .pillar-cards { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (min-width: 1024px) {
+        .layout-grid { flex-direction: row; }
+        .layout-grid > .main-col { flex: 1; min-width: 0; }
+        .sidebar { width: 280px; flex-shrink: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <span>メニュー</span>
+        <button id="drawerClose">✕ CLOSE</button>
       </div>
-    </section>
-  </div>
-</BaseLayout>
+      {PILLAR_SLUGS.map((slug) => (
+        <a class="drawer-cat-item" href={`/category/${slug}/`}>
+          <span>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</span>
+          {postsByPillar[slug].length > 0 && <span class="cat-badge">{postsByPillar[slug].length}</span>}
+        </a>
+      ))}
+      <a class="drawer-cat-item" href="/about/">👤 プロフィール</a>
+      <a class="drawer-cat-item" href="/contact/">✉ お問い合わせ</a>
+      <a class="drawer-cat-item" href="/privacy/">プライバシーポリシー</a>
+    </div>
 
-<style>
-  .home {
-    text-align: center;
-  }
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="/" class="logo">{SITE_NAME}</a>
+        <nav class="desktop-nav">
+          {PILLAR_SLUGS.map((slug) => (
+            <a href={`/category/${slug}/`}>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</a>
+          ))}
+          <a href="/about/">👤 プロフィール</a>
+          <a href="/contact/">✉ お問い合わせ</a>
+        </nav>
+        <button class="menu-btn" id="menuOpen">☰ メニュー</button>
+      </div>
+    </header>
 
-  h1 {
-    color: #1a365d;
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
+    <main class="home-main">
+      <div class="hero">
+        <div class="hero-inner">
+          <div>
+            <h1>{SITE_NAME}</h1>
+            <p>{SITE_DESCRIPTION}</p>
+          </div>
+          <div class="hero-pillars">
+            {PILLAR_SLUGS.map((slug) => (
+              <a class="hero-pillar" href={`/category/${slug}/`}>
+                <span class="hero-pillar-icon">{CATEGORY_CONFIG[slug].icon}</span>
+                <span class="hero-pillar-label">{CATEGORY_CONFIG[slug].label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
 
-  .tagline {
-    font-size: 1.1rem;
-    color: #718096;
-    margin-bottom: 2rem;
-  }
+      <div class="featured-box">
+        <div class="featured-header">
+          <h2>⭐ まず読んでほしい記事</h2>
+        </div>
+        <div class="featured-grid">
+          {featuredPosts.map(({ post, pillar }) => (
+            <a class="featured-item" href={`/blog/${post.slug}`}>
+              {post.data.heroImage ? (
+                <img class="featured-thumb" src={post.data.heroImage} alt={post.data.title} />
+              ) : (
+                <div class="featured-thumb-fallback">{CATEGORY_CONFIG[pillar].icon}</div>
+              )}
+              <div class="featured-body">
+                <span class="featured-badge">{CATEGORY_CONFIG[pillar].icon} {CATEGORY_CONFIG[pillar].label}</span>
+                <p class="featured-title">{post.data.title}</p>
+                <p class="featured-desc">{post.data.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
 
-  section {
-    text-align: left;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
+      <div class="layout-grid">
+        <div class="main-col">
+          {PILLAR_SLUGS.map((slug) => {
+            const cfg = CATEGORY_CONFIG[slug];
+            const sectionPosts = postsByPillar[slug];
+            const displayPosts = sectionPosts.slice(0, 4);
+            return (
+              <section class="pillar-section">
+                <div class="pillar-heading">
+                  <span class="pillar-heading-left"><span>{cfg.icon}</span><span>{cfg.label}</span></span>
+                  <a class="more" href={`/category/${slug}/`}>すべて見る（{sectionPosts.length}件）→</a>
+                </div>
+                {displayPosts.length === 0 ? (
+                  <p class="pillar-empty">近日公開予定です。</p>
+                ) : (
+                  <div class="pillar-cards">
+                    {displayPosts.map((post) => (
+                      <a class="pillar-card" href={`/blog/${post.slug}`}>
+                        {post.data.heroImage ? (
+                          <img class="pillar-card-thumb" src={post.data.heroImage} alt={post.data.title} />
+                        ) : (
+                          <div class="pillar-card-thumb-fallback">{cfg.icon}</div>
+                        )}
+                        <div class="pillar-card-body">
+                          <div class="pillar-card-meta">
+                            <span class="featured-badge">{cfg.icon} {cfg.label}</span>
+                            <span class="pillar-card-date">{post.data.pubDate.toLocaleDateString('ja-JP')}</span>
+                          </div>
+                          <p class="pillar-card-title">{post.data.title}</p>
+                          <p class="pillar-card-desc">{post.data.description}</p>
+                          <span class="pillar-card-read">記事を読む →</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
 
-  h2 {
-    color: #1a365d;
-    margin-bottom: 1.5rem;
-  }
+        <aside class="sidebar">
+          <div class="widget">
+            <div class="widget-title">📝 投稿者</div>
+            <div class="widget-body profile-widget">
+              <img class="profile-photo" src="/images/profile.png" alt="ただの会社員" />
+              <p class="profile-name">ただの会社員</p>
+              <p class="profile-bio">AI/DX推進部の副部長として生成AI活用・資格学習・業務改善を実践する会社員。趣味は将棋で、日々の記録を発信しています。</p>
+              <a class="profile-link" href="/about/">プロフィール詳細 →</a>
+            </div>
+          </div>
 
-  p {
-    color: #4a5568;
-    line-height: 1.8;
-  }
+          <div class="widget">
+            <div class="widget-title">🔍 サイト内検索</div>
+            <div class="widget-body">
+              <form class="search-form" action="/search" method="get">
+                <input type="text" name="q" placeholder="キーワードを入力" />
+                <button type="submit">検索</button>
+              </form>
+            </div>
+          </div>
 
-  .posts-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
+          <div class="widget">
+            <div class="widget-title">🏆 人気記事</div>
+            <div class="widget-body">
+              {popularPosts.map((post, i) => (
+                <a class="popular-item" href={`/blog/${post.slug}`}>
+                  <span class={`popular-rank ${i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : ''}`}>{i + 1}</span>
+                  <span class="popular-title">{post.data.title}</span>
+                </a>
+              ))}
+            </div>
+          </div>
 
-  .posts-list li {
-    border-left: 4px solid #3182ce;
-    padding-left: 1rem;
-    transition: all 0.2s;
-  }
+          <div class="widget">
+            <div class="widget-title">📂 カテゴリー</div>
+            <div>
+              {PILLAR_SLUGS.map((slug) => (
+                <a class="cat-widget-item" href={`/category/${slug}/`}>
+                  <span>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</span>
+                  <span class="cat-badge">{postsByPillar[slug].length}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
 
-  .posts-list li:hover {
-    border-left-color: #1a365d;
-    transform: translateX(4px);
-  }
+    <footer class="site-footer">
+      <nav class="footer-nav">
+        <a href="/">ホーム</a>
+        {PILLAR_SLUGS.map((slug) => (
+          <a href={`/category/${slug}/`}>{CATEGORY_CONFIG[slug].icon} {CATEGORY_CONFIG[slug].label}</a>
+        ))}
+        <a href="/about/">プロフィール</a>
+        <a href="/contact/">お問い合わせ</a>
+        <a href="/privacy/">プライバシーポリシー</a>
+        <a href="/search/">検索</a>
+      </nav>
+      <p>&copy; 2026 {SITE_NAME}. All rights reserved.</p>
+    </footer>
 
-  .post-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: #1a365d;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .post-link:hover {
-    color: #3182ce;
-  }
-
-  .post-date {
-    display: inline-block;
-    min-width: 100px;
-    color: #718096;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-
-  .post-title {
-    flex: 1;
-  }
-
-  .view-all {
-    text-align: center;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
-  }
-
-  .view-all-link {
-    color: #3182ce;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .view-all-link:hover {
-    color: #1a365d;
-    text-decoration: underline;
-  }
-</style>
+    <script>
+      const drawer = document.getElementById('drawer');
+      const overlay = document.getElementById('drawerOverlay');
+      document.getElementById('menuOpen')?.addEventListener('click', () => {
+        drawer?.classList.add('open');
+        overlay?.classList.add('open');
+      });
+      const closeDrawer = () => {
+        drawer?.classList.remove('open');
+        overlay?.classList.remove('open');
+      };
+      document.getElementById('drawerClose')?.addEventListener('click', closeDrawer);
+      overlay?.addEventListener('click', closeDrawer);
+    </script>
+  </body>
+</html>

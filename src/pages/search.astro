@@ -1,0 +1,161 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { CATEGORY_CONFIG, matchesCategory } from './category/[slug].astro';
+
+const PILLAR_SLUGS = ['shogi', 'ai-dx', 'shikaku', 'shigoto'] as const;
+
+const allPosts = await getCollection('blog');
+const postsJson = JSON.stringify(allPosts.map((p) => {
+  const pillar = PILLAR_SLUGS.find((slug) => matchesCategory(slug, p.data)) ?? 'shigoto';
+  return {
+    slug: p.slug,
+    title: p.data.title,
+    description: p.data.description ?? '',
+    pillar,
+    icon: CATEGORY_CONFIG[pillar].icon,
+    label: CATEGORY_CONFIG[pillar].label,
+    tags: p.data.tags ?? [],
+    pubDate: p.data.pubDate.toLocaleDateString('ja-JP'),
+    heroImage: p.data.heroImage ?? '',
+  };
+}));
+---
+<BaseLayout
+  title="記事検索"
+  description="ただの会社員の生活日記の全記事から検索できます。将棋・AI/DX・資格学習・仕事術に関する記事を探す。"
+>
+  <script define:vars={{ postsJson }}>
+    const ALL_POSTS = JSON.parse(postsJson);
+
+    function renderResults(q) {
+      const query = q.trim().toLowerCase();
+      const grid = document.getElementById('resultGrid');
+      const noResult = document.getElementById('noResult');
+      const msg = document.getElementById('resultMsg');
+
+      const filtered = query
+        ? ALL_POSTS.filter((p) =>
+            p.label.toLowerCase() === query ||
+            p.tags.some((t) => t.toLowerCase() === query || t.toLowerCase().includes(query)) ||
+            p.title.toLowerCase().includes(query) ||
+            p.description.toLowerCase().includes(query)
+          )
+        : ALL_POSTS;
+
+      msg.textContent = query ? `「${q}」の検索結果：${filtered.length}件` : `全記事：${filtered.length}件`;
+
+      grid.innerHTML = '';
+      if (filtered.length === 0) {
+        noResult.classList.remove('hidden');
+        document.getElementById('noResultQuery').textContent = q;
+        return;
+      }
+      noResult.classList.add('hidden');
+
+      filtered.forEach((p) => {
+        const thumbHtml = p.heroImage
+          ? `<img src="${p.heroImage}" alt="${p.title.replace(/"/g, '&quot;')}" class="result-thumb">`
+          : `<div class="result-thumb-fallback">${p.icon}</div>`;
+
+        grid.innerHTML += `
+          <a href="/blog/${p.slug}" class="result-card">
+            ${thumbHtml}
+            <div class="result-body">
+              <div class="result-meta">
+                <span class="result-badge">${p.icon} ${p.label}</span>
+                <span class="result-date">${p.pubDate}</span>
+              </div>
+              <h3 class="result-title">${p.title}</h3>
+              <p class="result-desc">${p.description}</p>
+              <span class="result-link">記事を読む →</span>
+            </div>
+          </a>`;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const initialQ = params.get('q') || '';
+      if (initialQ) document.title = `「${initialQ}」の検索結果 | ただの会社員の生活日記`;
+
+      const input = document.getElementById('searchInput');
+      input.value = initialQ;
+      renderResults(initialQ);
+
+      document.getElementById('searchForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = input.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', q);
+        window.history.pushState({}, '', url);
+        renderResults(q);
+      });
+
+      input.addEventListener('input', () => renderResults(input.value));
+    });
+  </script>
+
+  <article>
+    <h1>記事検索</h1>
+    <form id="searchForm" class="search-form">
+      <input id="searchInput" type="text" placeholder="キーワードを入力..." />
+      <button type="submit">検索</button>
+    </form>
+
+    <p id="resultMsg" class="result-msg"></p>
+    <div id="resultGrid" class="result-grid"></div>
+    <div id="noResult" class="no-result hidden">
+      <p class="no-result-icon">🔍</p>
+      <p>「<span id="noResultQuery"></span>」に一致する記事が見つかりませんでした。</p>
+      <a href="/">← トップに戻る</a>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .search-form { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .search-form input {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+  }
+  .search-form button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .result-msg { color: #718096; font-size: 0.9rem; margin-bottom: 1rem; }
+  .result-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 640px) {
+    .result-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .result-card {
+    display: block;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .result-card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .result-thumb { width: 100%; height: 140px; object-fit: cover; display: block; }
+  .result-thumb-fallback { width: 100%; height: 140px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
+  .result-body { padding: 1rem; }
+  .result-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .result-badge { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 9999px; background: #dbeafe; color: #1d4ed8; }
+  .result-date { font-size: 0.72rem; color: #94a3b8; }
+  .result-title { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.4; }
+  .result-desc { font-size: 0.78rem; color: #64748b; margin: 0 0 0.5rem; }
+  .result-link { font-size: 0.75rem; font-weight: 700; color: #2563eb; }
+  .hidden { display: none; }
+  .no-result { text-align: center; padding: 3rem 0; color: #718096; }
+  .no-result-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }
+</style>

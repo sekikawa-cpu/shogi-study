@@ -4,8 +4,11 @@ interface Props {
   description?: string;
 }
 
-const { title = '悠人の四間飛車党将棋ブログ', description = '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等を書いています。' } = Astro.props;
-const pageTitle = title ? `${title} | 悠人の四間飛車党将棋ブログ` : '悠人の四間飛車党将棋ブログ';
+const SITE_NAME = 'ただの会社員の生活日記';
+const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
+
+const { title = '', description = SITE_DESCRIPTION } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -21,17 +24,47 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:image" content={new URL('/images/profile.png', Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
     <!-- Google AdSense -->
     <meta name="google-adsense-account" content="ca-pub-7499855875738477">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7499855875738477"
      crossorigin="anonymous"></script>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": SITE_NAME,
+      "url": String(Astro.site),
+      "description": SITE_DESCRIPTION,
+      "publisher": {
+        "@type": "Organization",
+        "name": SITE_NAME,
+        "url": String(Astro.site),
+        "logo": { "@type": "ImageObject", "url": new URL('/images/profile.png', Astro.site) }
+      }
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "ただの会社員",
+      "url": new URL('/about/', Astro.site),
+      "image": new URL('/images/profile.png', Astro.site),
+      "description": "AI/DX推進部の副部長として働く会社員。生成AI活用・資格学習・キャリア形成、趣味の将棋についても発信。"
+    })} />
   </head>
   <body>
     <div class="layout-wrapper">
       <header class="site-header">
         <div class="header-top">
           <button id="menu-toggle" class="menu-toggle">☰ MENU</button>
-          <a href="/" class="logo">♔ 悠人の四間飛車党将棋ブログ</a>
+          <a href="/" class="logo">{SITE_NAME}</a>
           <div class="search-placeholder"></div>
         </div>
 
@@ -40,33 +73,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             <button id="nav-close-btn">✕ CLOSE</button>
           </div>
           <ul class="nav-list">
-            <li class="nav-category">
-              <a href="/blog">♔ 将棋</a>
-              <ul class="nav-subcategory">
-                <li><a href="/blog?tag=四間飛車">四間飛車</a></li>
-                <li><a href="/blog?tag=棋譜">棋譜</a></li>
-                <li><a href="/blog?tag=ShogiGUI">ShogiGUI</a></li>
-                <li><a href="/blog?tag=将棋ソフト">将棋ソフト</a></li>
-              </ul>
-            </li>
-            <li class="nav-category">
-              <a href="/blog">📚 棋書</a>
-              <ul class="nav-subcategory">
-                <li><a href="/blog?tag=棋書レビュー">棋書レビュー</a></li>
-                <li><a href="/blog?tag=上達">上達</a></li>
-              </ul>
-            </li>
-            <li class="nav-category">
-              <a href="/blog">🎓 体験記</a>
-              <ul class="nav-subcategory">
-                <li><a href="/blog?tag=体験記">体験記</a></li>
-                <li><a href="/blog?tag=道場">道場</a></li>
-                <li><a href="/blog?tag=初段">初段</a></li>
-              </ul>
-            </li>
-            <li class="nav-category">
-              <a href="/ai-dx/">🤖 AI・DX</a>
-            </li>
+            <li class="nav-category"><a href="/category/shogi/">♔ 将棋</a></li>
+            <li class="nav-category"><a href="/category/ai-dx/">🤖 AI・DX</a></li>
+            <li class="nav-category"><a href="/category/shikaku/">📖 資格・学習</a></li>
+            <li class="nav-category"><a href="/category/shigoto/">💼 仕事術</a></li>
+            <li class="nav-category"><a href="/about/">👤 プロフィール</a></li>
+            <li class="nav-category"><a href="/contact/">✉ お問い合わせ</a></li>
           </ul>
         </nav>
       </header>
@@ -79,44 +91,43 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <aside class="sidebar">
           <div class="sidebar-section">
             <h3>検索</h3>
-            <div class="search-box">
-              <input type="text" placeholder="記事を検索..." />
-            </div>
+            <form class="search-box" action="/search" method="get">
+              <input type="text" name="q" placeholder="記事を検索..." />
+            </form>
           </div>
 
           <div class="sidebar-section">
             <h3>💡 About</h3>
             <div class="about-box">
-              <p>四間飛車党による将棋ブログです。戦型対策、棋書レビュー、将棋ソフト・アプリの紹介など、四間飛車に関するコンテンツを中心に扱っています。</p>
+              <p>{SITE_DESCRIPTION}</p>
+              <p><a href="/about/">運営者プロフィール →</a></p>
             </div>
           </div>
 
           <div class="sidebar-section">
             <h3>📌 カテゴリー</h3>
             <ul class="category-list">
-              <li><a href="/blog?tag=将棋ソフト">♔ 将棋ソフト</a></li>
-              <li><a href="/blog?tag=棋譜">📝 棋譜</a></li>
-              <li><a href="/blog?tag=体験記">📖 体験記</a></li>
-              <li><a href="/blog?tag=棋書">📚 棋書</a></li>
+              <li><a href="/category/shogi/">♔ 将棋</a></li>
+              <li><a href="/category/ai-dx/">🤖 AI・DX</a></li>
+              <li><a href="/category/shikaku/">📖 資格・学習</a></li>
+              <li><a href="/category/shigoto/">💼 仕事術</a></li>
             </ul>
-          </div>
-
-          <div class="sidebar-section">
-            <h3>🏷️ タグ</h3>
-            <div class="tags-cloud">
-              <a href="/blog?tag=ShogiGUI" class="tag">ShogiGUI</a>
-              <a href="/blog?tag=将棋ウォーズ" class="tag">将棋ウォーズ</a>
-              <a href="/blog?tag=四間飛車" class="tag">四間飛車</a>
-              <a href="/blog?tag=棋譜" class="tag">棋譜</a>
-              <a href="/blog?tag=将棋ソフト" class="tag">将棋ソフト</a>
-            </div>
           </div>
         </aside>
       </div>
 
       <footer class="site-footer">
-        <p>&copy; 2026 悠人の四間飛車党将棋ブログ. All rights reserved.</p>
-        <p>このサイトはAstroとTailwind CSSで構築されています。</p>
+        <nav class="footer-nav">
+          <a href="/">ホーム</a>
+          <a href="/category/shogi/">将棋</a>
+          <a href="/category/ai-dx/">AI・DX</a>
+          <a href="/category/shikaku/">資格・学習</a>
+          <a href="/category/shigoto/">仕事術</a>
+          <a href="/about/">プロフィール</a>
+          <a href="/contact/">お問い合わせ</a>
+          <a href="/privacy/">プライバシーポリシー</a>
+        </nav>
+        <p>&copy; 2026 {SITE_NAME}. All rights reserved.</p>
       </footer>
     </div>
 
@@ -268,30 +279,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         border-bottom-color: var(--accent-color);
       }
 
-      .nav-subcategory {
-        list-style: none;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-      }
-
-      .nav-category:hover .nav-subcategory {
-        max-height: 500px;
-      }
-
-      .nav-subcategory li a {
-        display: block;
-        padding: 0.75rem 0 0.75rem 1.5rem;
-        text-decoration: none;
-        color: #4a5568;
-        font-size: 0.95rem;
-        transition: color 0.2s;
-      }
-
-      .nav-subcategory li a:hover {
-        color: var(--accent-color);
-      }
-
       /* Container and Main Layout */
       .container {
         flex: 1;
@@ -350,6 +337,15 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         line-height: 1.7;
       }
 
+      .about-box p {
+        margin-bottom: 0.5rem;
+      }
+
+      .about-box a {
+        color: var(--accent-color);
+        font-weight: 600;
+      }
+
       .category-list {
         list-style: none;
       }
@@ -369,28 +365,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         color: var(--primary-color);
       }
 
-      .tags-cloud {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .tags-cloud .tag {
-        display: inline-block;
-        background: #edf2f7;
-        color: #2d3748;
-        padding: 0.4rem 0.75rem;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        transition: all 0.2s;
-      }
-
-      .tags-cloud .tag:hover {
-        background: var(--accent-color);
-        color: white;
-      }
-
       /* Footer */
       .site-footer {
         background: #f7fafc;
@@ -400,6 +374,25 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         color: #718096;
         font-size: 0.9rem;
         margin-top: auto;
+      }
+
+      .footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .footer-nav a {
+        color: #718096;
+        text-decoration: none;
+        font-size: 0.85rem;
+      }
+
+      .footer-nav a:hover {
+        color: var(--accent-color);
+        text-decoration: underline;
       }
 
       .site-footer p {
@@ -457,14 +450,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           border: none;
           border-bottom: 1px solid var(--border-color);
           padding: 1rem 1.5rem;
-        }
-
-        .nav-category:hover .nav-subcategory {
-          max-height: 500px;
-        }
-
-        .nav-subcategory li a {
-          padding: 0.75rem 1.5rem 0.75rem 3rem;
         }
 
         .container {

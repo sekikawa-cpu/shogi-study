@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="初めての方へ"
+  description="AI/DX推進部の副部長として働く会社員が、キャリア形成のリアルと趣味の将棋を発信するブログです。実際にやってみて詰まったこと・失敗したこと・気づいたことをそのまま書いています。"
+>
+  <article class="intro-article">
+    <div class="intro-head">
+      <h1>✨ 初めての方へ</h1>
+      <p>このブログを訪れてくださり、ありがとうございます。<br />サイトの概要と、読み始めやすい記事をご紹介します。</p>
+    </div>
+
+    <div class="site-overview">
+      <h2>📝 このサイトについて</h2>
+      <p><strong>ただの会社員の生活日記</strong>は、<strong>AI/DX推進部の副部長</strong>として働く地方在住の会社員が、<strong>自分自身のキャリア形成のリアル</strong>と、趣味の<strong>将棋</strong>を記録するブログです。</p>
+      <p>生成AIの使い方を教えるサイトではありません。「今の自分が、仕事・資格・学習・将棋でどんな壁にぶつかり、どう乗り越えようとしているか」を等身大で書いています。</p>
+      <p>「こうすべき」という一般論ではなく、詰まったこと・失敗したこと・気づいたことをそのまま発信しています。同じように悩んでいる方の参考になれば嬉しいです。</p>
+    </div>
+
+    <h2 class="section-title">📌 このサイトで読めること</h2>
+
+    <div class="pillar-list">
+      <div class="pillar-card pillar-shogi">
+        <h3>♔ 将棋</h3>
+        <p>四間飛車党としての体験記・戦型別対策・棋書レビュー。将棋会館道場での棋力認定挑戦や、初段になるまでの道のりも記録しています。</p>
+        <div class="pillar-links">
+          <a class="pillar-cta" href="/category/shogi/">将棋の記事を読む →</a>
+          <a class="pillar-tag" href="/blog/journey-to-first-dan">初段になるまでの道のり</a>
+          <a class="pillar-tag" href="/blog/shogigui-installation-yaneuraoking">ShogiGUI導入方法</a>
+        </div>
+      </div>
+
+      <div class="pillar-card pillar-ai-dx">
+        <h3>🤖 AI/DX・生成AI活用</h3>
+        <p>ChatGPT Teams・Claude・Geminiなどの生成AIを、実際の業務でどう使ったか・何がうまくいかなかったかを記録しています。現場で使ってみたリアルな体験談が中心です。</p>
+        <div class="pillar-links">
+          <a class="pillar-cta" href="/category/ai-dx/">AI活用の記事を読む →</a>
+          <a class="pillar-tag" href="/blog/hallucination-ai-lesson">ハルシネーション体験記</a>
+          <a class="pillar-tag" href="/blog/claude-vs-chatgpt-gyomu-hikaku">Claude vs ChatGPT</a>
+        </div>
+      </div>
+
+      <div class="pillar-card pillar-shikaku">
+        <h3>📖 資格・学習記録</h3>
+        <p>キャリアを切り拓くための資格学習・自己研鑽の記録です。「合格した」だけでなく、どこで詰まったか・仕事と両立するためにどう工夫したかまで書いています。G検定は2026#3で全8分野100%満点合格。</p>
+        <div class="pillar-links">
+          <a class="pillar-cta" href="/category/shikaku/">資格・学習の記事を読む →</a>
+          <a class="pillar-tag" href="/blog/g-kentei-2026-3-kekka">G検定満点合格の話</a>
+          <a class="pillar-tag" href="/blog/sc-joho-anzen-shien-shi-benkyoho">情報処理安全確保支援士</a>
+        </div>
+      </div>
+
+      <div class="pillar-card pillar-shigoto">
+        <h3>💼 仕事術・キャリア形成</h3>
+        <p>DX推進部の副部長として現場で感じた「社内DXが進まない壁」や、副部長になるまでのキャリアの経緯、Claude Codeでブログをゼロから構築した記録などを書いています。</p>
+        <div class="pillar-links">
+          <a class="pillar-cta" href="/category/shigoto/">仕事術・キャリアの記事を読む →</a>
+          <a class="pillar-tag" href="/blog/dx-suishin-kaisha-naichousei">DX推進の壁</a>
+          <a class="pillar-tag" href="/blog/claude-code-dx-case-study-1">Claude Codeでブログ構築</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="disclaimer">
+      ⚠️ 当サイトの記事は個人の体験・学習記録であり、専門的助言ではありません。詳しくは<a href="/privacy/">プライバシーポリシー</a>をご確認ください。
+    </p>
+
+    <div class="cta-footer">
+      <a class="home-cta" href="/">🏠 記事一覧を見る</a>
+      <p><a href="/about/">運営者プロフィール</a>も合わせてご覧ください。</p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .intro-article { max-width: 720px; margin: 0 auto; }
+  .intro-head { text-align: center; margin-bottom: 2rem; }
+  .intro-head h1 { font-size: 1.6rem; margin-bottom: 0.75rem; }
+  .intro-head p { color: #4a5568; }
+  .site-overview {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .site-overview h2 { margin-bottom: 0.75rem; }
+  .site-overview p { margin-bottom: 0.6rem; color: #4a5568; font-size: 0.92rem; }
+  .section-title { margin-bottom: 1rem; }
+  .pillar-list { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2rem; }
+  .pillar-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-left: 4px solid #94a3b8;
+  }
+  .pillar-shogi { border-left-color: #1a365d; }
+  .pillar-ai-dx { border-left-color: #7c3aed; }
+  .pillar-shikaku { border-left-color: #b45309; }
+  .pillar-shigoto { border-left-color: #0e7490; }
+  .pillar-card h3 { margin-bottom: 0.5rem; font-size: 1.05rem; }
+  .pillar-card p { color: #4a5568; font-size: 0.88rem; margin-bottom: 0.75rem; }
+  .pillar-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pillar-cta {
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+    border-radius: 9999px;
+    text-decoration: none;
+  }
+  .pillar-tag {
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    text-decoration: none;
+  }
+  .disclaimer {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    border-left: 2px solid #e2e8f0;
+    padding-left: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .cta-footer { text-align: center; }
+  .home-cta {
+    display: inline-block;
+    background: #1e293b;
+    color: #fff;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+  .cta-footer p { font-size: 0.78rem; color: #94a3b8; }
+</style>

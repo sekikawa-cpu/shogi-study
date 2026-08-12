@@ -2,14 +2,57 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog', ({ data }) => data.section === 'ai-dx')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+export const CATEGORY_CONFIG = {
+  shogi: {
+    label: '将棋',
+    icon: '♔',
+    description: '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等。',
+  },
+  'ai-dx': {
+    label: 'AI・DX',
+    icon: '🤖',
+    description: 'ChatGPT・Claude・GeminiなどAIツールの業務活用とDX推進の実践記録。',
+  },
+  shikaku: {
+    label: '資格・学習',
+    icon: '📖',
+    description: '資格取得・学習の記録。合格体験だけでなく詰まった場所や工夫した勉強法を中心に。',
+  },
+  shigoto: {
+    label: '仕事術・キャリア形成',
+    icon: '💼',
+    description: 'DX推進の現場で感じた壁や気づき、キャリア形成にまつわる実体験。',
+  },
+};
+
+export function matchesCategory(slug, data) {
+  if (slug === 'shogi') return (data.section ?? 'shogi') === 'shogi';
+  const cats = data.categories ?? [];
+  if (slug === 'ai-dx') return cats.includes('AIツール');
+  if (slug === 'shikaku') return cats.includes('資格・学習');
+  if (slug === 'shigoto') {
+    return cats.some((c) => ['DX・業務改善', '書籍レビュー', '仕事術・キャリア形成', 'コラム'].includes(c));
+  }
+  return false;
+}
+
+export function getStaticPaths() {
+  return Object.keys(CATEGORY_CONFIG).map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const cfg = CATEGORY_CONFIG[slug];
+
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter((p) => matchesCategory(slug, p.data))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="AI・DX" description="AIツール・DX業務改善・資格学習・キャリア形成に関する記事一覧">
+<BaseLayout title={cfg.label} description={cfg.description}>
   <article>
-    <h1>AI・DX記事一覧</h1>
+    <h1>{cfg.icon} {cfg.label}</h1>
+    <p class="category-description">{cfg.description}</p>
 
     {posts.length === 0 ? (
       <p>記事はまだ投稿されていません。</p>
@@ -49,6 +92,11 @@ const posts = (await getCollection('blog', ({ data }) => data.section === 'ai-dx
 </BaseLayout>
 
 <style>
+  .category-description {
+    color: #718096;
+    margin-bottom: 2rem;
+  }
+
   .posts-list {
     display: flex;
     flex-direction: column;
