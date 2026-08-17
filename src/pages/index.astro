@@ -10,7 +10,7 @@ const allPosts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const PILLAR_SLUGS = ['ai-dx', 'shikaku', 'shigoto', 'shogi'] as const;
+const PILLAR_SLUGS = ['ai-dx', 'shikaku', 'shigoto', 'shinrigaku', 'shogi'] as const;
 
 const postsByPillar: Record<string, typeof allPosts> = {};
 PILLAR_SLUGS.forEach((slug) => {

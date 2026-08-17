@@ -3,12 +3,13 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  noindex?: boolean;
 }
 
 const SITE_NAME = 'ただの会社員の生活日記';
 const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
 
-const { title = '', description = SITE_DESCRIPTION, image = '/images/profile.png' } = Astro.props;
+const { title = '', description = SITE_DESCRIPTION, image = '/images/profile.png', noindex = false } = Astro.props;
 const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -20,6 +21,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -79,6 +81,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <a class="drawer-cat-item" href="/category/ai-dx/">🤖 AI・DX</a>
         <a class="drawer-cat-item" href="/category/shikaku/">📖 資格・学習</a>
         <a class="drawer-cat-item" href="/category/shigoto/">💼 仕事術・キャリア形成</a>
+        <a class="drawer-cat-item" href="/category/shinrigaku/">🧠 心理学</a>
         <a class="drawer-cat-item" href="/category/shogi/"><span class="category-label"><img src="/images/icons/shogi-piece.svg" alt="" class="shogi-nav-icon" /> 将棋</span></a>
         <a class="drawer-cat-item" href="/about/">👤 プロフィール</a>
         <a class="drawer-cat-item" href="/contact/">✉ お問い合わせ</a>
@@ -92,6 +95,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             <a href="/category/ai-dx/">🤖 AI・DX</a>
             <a href="/category/shikaku/">📖 資格・学習</a>
             <a href="/category/shigoto/">💼 仕事術・キャリア形成</a>
+            <a href="/category/shinrigaku/">🧠 心理学</a>
             <a href="/category/shogi/"><img src="/images/icons/shogi-piece.svg" alt="" class="shogi-nav-icon" /> 将棋</a>
             <a href="/about/">👤 プロフィール</a>
             <a href="/contact/">✉ お問い合わせ</a>
@@ -127,6 +131,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
               <li><a href="/category/ai-dx/">🤖 AI・DX</a></li>
               <li><a href="/category/shikaku/">📖 資格・学習</a></li>
               <li><a href="/category/shigoto/">💼 仕事術</a></li>
+              <li><a href="/category/shinrigaku/">🧠 心理学</a></li>
               <li><a href="/category/shogi/"><img src="/images/icons/shogi-piece.svg" alt="" class="shogi-nav-icon" /> 将棋</a></li>
             </ul>
           </div>
@@ -139,6 +144,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           <a href="/category/ai-dx/">AI・DX</a>
           <a href="/category/shikaku/">資格・学習</a>
           <a href="/category/shigoto/">仕事術</a>
+          <a href="/category/shinrigaku/">心理学</a>
           <a href="/category/shogi/">将棋</a>
           <a href="/about/">プロフィール</a>
           <a href="/contact/">お問い合わせ</a>

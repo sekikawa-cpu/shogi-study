@@ -19,6 +19,11 @@ export const CATEGORY_CONFIG = {
     icon: '💼',
     description: 'DX推進の現場で感じた壁や気づき、キャリア形成にまつわる実体験。',
   },
+  shinrigaku: {
+    label: '心理学',
+    icon: '🧠',
+    description: '産業カウンセラー養成講座での学び、メンタルヘルス資格の体験記、自分の半生を振り返るセルフドキュメンタリー。',
+  },
   shogi: {
     label: '将棋',
     icon: '歩',
@@ -34,6 +39,9 @@ export function matchesCategory(slug, data) {
   if (slug === 'shikaku') return cats.includes('資格・学習');
   if (slug === 'shigoto') {
     return cats.some((c) => ['DX・業務改善', '書籍レビュー', '仕事術・キャリア形成', 'コラム'].includes(c));
+  }
+  if (slug === 'shinrigaku') {
+    return cats.some((c) => ['心理学・メンタル', '生きづらさと回復', 'ボランティア'].includes(c));
   }
   return false;
 }
