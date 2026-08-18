@@ -30,6 +30,11 @@ export const CATEGORY_CONFIG = {
     iconImage: '/images/icons/shogi-piece.svg',
     description: '四間飛車党による体験記・戦型別対策・棋書レビュー・雑記等。',
   },
+  toushi: {
+    label: '投資',
+    icon: '💰',
+    description: '国内高配当株・株主優待・家計管理など、地方在住サラリーマンの投資体験をありのままに記録。',
+  },
 };
 
 export function matchesCategory(slug, data) {
@@ -43,6 +48,7 @@ export function matchesCategory(slug, data) {
   if (slug === 'shinrigaku') {
     return cats.some((c) => ['心理学・メンタル', '生きづらさと回復', 'ボランティア'].includes(c));
   }
+  if (slug === 'toushi') return cats.includes('投資');
   return false;
 }
 
