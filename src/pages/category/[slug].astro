@@ -80,13 +80,13 @@ const posts = allPosts
         {posts.map((post) => (
           <div class="post-item">
             {post.data.heroImage && (
-              <a href={`/blog/${post.slug}`} class="post-thumb-link" tabindex="-1" aria-hidden="true">
+              <a href={`/blog/${post.slug}/`} class="post-thumb-link" tabindex="-1" aria-hidden="true">
                 <img src={post.data.heroImage} alt="" class="post-thumb" loading="lazy" />
               </a>
             )}
             <div class="post-body">
             <h2>
-              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+              <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
             </h2>
             <div class="post-meta">
               <time datetime={post.data.pubDate.toISOString()}>
@@ -108,7 +108,7 @@ const posts = allPosts
                 ))}
               </div>
             )}
-            <a href={`/blog/${post.slug}`} class="read-more">記事を読む →</a>
+            <a href={`/blog/${post.slug}/`} class="read-more">記事を読む →</a>
             </div>
           </div>
         ))}

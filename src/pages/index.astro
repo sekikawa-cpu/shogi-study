@@ -279,7 +279,7 @@ const canonicalURL = new URL('/', Astro.site);
         </div>
         <div class="featured-grid">
           {featuredPosts.map(({ post, pillar }) => (
-            <a class="featured-item" href={`/blog/${post.slug}`}>
+            <a class="featured-item" href={`/blog/${post.slug}/`}>
               {post.data.heroImage ? (
                 <img class="featured-thumb" src={post.data.heroImage} alt={post.data.title} />
               ) : (
@@ -312,7 +312,7 @@ const canonicalURL = new URL('/', Astro.site);
                 ) : (
                   <div class="pillar-cards">
                     {displayPosts.map((post) => (
-                      <a class="pillar-card" href={`/blog/${post.slug}`}>
+                      <a class="pillar-card" href={`/blog/${post.slug}/`}>
                         {post.data.heroImage ? (
                           <img class="pillar-card-thumb" src={post.data.heroImage} alt={post.data.title} />
                         ) : (
@@ -361,7 +361,7 @@ const canonicalURL = new URL('/', Astro.site);
             <div class="widget-title">🏆 人気記事</div>
             <div class="widget-body">
               {popularPosts.map((post, i) => (
-                <a class="popular-item" href={`/blog/${post.slug}`}>
+                <a class="popular-item" href={`/blog/${post.slug}/`}>
                   <span class={`popular-rank ${i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : ''}`}>{i + 1}</span>
                   <span class="popular-title">{post.data.title}</span>
                 </a>
