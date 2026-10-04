@@ -7,7 +7,7 @@ import {projectRecord,mergeOperation} from './sync-model.js';
 const app=initializeApp(firebaseConfig),auth=getAuth(app);
 const cloud=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const el=id=>document.getElementById(id),frame=el('study');
-let user=null,journal=null,bridge=null,unsubscribe=null,flushing=false,failed=false;
+let user=null,journal=null,bridge=null,unsubscribe=null,flushing=false,failed=false,privateUrl=null;
 const deviceId=localStorage.getItem('ds-cloud-device')||crypto.randomUUID();localStorage.setItem('ds-cloud-device',deviceId);
 const message=text=>{el('message').textContent=text;};
 const status=text=>{el('sync').textContent=text;};
@@ -88,7 +88,8 @@ async function start(u){
  if(digest!==manifest.sha256)throw new Error('教材の整合性確認に失敗しました');
  // A same-origin blob document keeps hash links inside the study app. srcdoc
  // resolves relative links against the public shell and would nest the login page.
- frame.src=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));frame.hidden=false;el('gate').hidden=true;el('logout').hidden=false;status('進捗を読み込んでいます…');
+ if(privateUrl)URL.revokeObjectURL(privateUrl);
+ privateUrl=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));frame.src=privateUrl;frame.hidden=false;el('gate').hidden=true;el('logout').hidden=false;status('進捗を読み込んでいます…');
 }
 el('login').onclick=async()=>{
  el('login').disabled=true;message('Googleログイン画面を開いています…');
@@ -101,7 +102,7 @@ el('logout').onclick=async()=>{
  await signOut(auth);location.reload();
 };
 onAuthStateChanged(auth,async u=>{
- if(!u){user=null;unsubscribe?.();frame.srcdoc='';frame.hidden=true;el('gate').hidden=false;el('logout').hidden=true;el('login').disabled=false;message('本人のGoogleアカウントでログインしてください。');status('ログインしていません');return;}
+ if(!u){user=null;bridge=null;unsubscribe?.();frame.src='about:blank';if(privateUrl)URL.revokeObjectURL(privateUrl);privateUrl=null;frame.hidden=true;el('gate').hidden=false;el('logout').hidden=true;el('login').disabled=false;message('本人のGoogleアカウントでログインしてください。');status('ログインしていません');return;}
  if(u.email!==OWNER_EMAIL||!u.emailVerified){message('このアプリは所有者専用です。所有者のアカウントでログインしてください。');status('閲覧権限がありません');el('logout').hidden=false;return;}
  try{await start(u);}catch(e){message(e.message==='学習データがまだ登録されていません'?e.message:errorText(e));status('読み込みできませんでした');el('logout').hidden=false;}
 });
