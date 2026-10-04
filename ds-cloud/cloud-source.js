@@ -1,5 +1,5 @@
 import {initializeApp} from 'firebase/app';
-import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from 'firebase/auth';
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {firebaseConfig,OWNER_EMAIL} from '../public/ds-study/config.js';
 import {projectRecord,mergeOperation} from './sync-model.js';
@@ -92,6 +92,8 @@ el('login').onclick=async()=>{
  el('login').disabled=true;message('Googleログイン画面を開いています…');
  try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){message(errorText(e));el('login').disabled=false;}
 };
+el('login-redirect').onclick=async()=>{message('Googleログイン画面へ移動します…');try{await signInWithRedirect(auth,new GoogleAuthProvider());}catch(e){message(errorText(e));}};
+getRedirectResult(auth).catch(e=>message(errorText(e)));
 el('logout').onclick=async()=>{
  if(flushing||(journal&&(await queued()).length)){message('未同期の記録があります。接続して同期が完了してからログアウトしてください。');status('未同期のためログアウトを保留');return;}
  await signOut(auth);location.reload();
