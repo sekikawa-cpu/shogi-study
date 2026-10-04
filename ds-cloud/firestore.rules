@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function owner() {
+   return request.auth != null && request.auth.token.email_verified == true
+    && request.auth.token.email == 'sekikawa0301@gmail.com';
+  }
+  match /content/{id} { allow read: if owner(); allow write: if false; }
+  match /users/{uid}/records/{id} {
+   allow read: if owner() && request.auth.uid == uid;
+   allow create, update: if owner() && request.auth.uid == uid
+    && request.resource.data.store in ['kv','logs','cards','quizzes','plan','units','notes','scores']
+    && request.resource.data.key is string;
+  }
+  match /users/{uid}/receipts/{id} {
+   allow read, create: if owner() && request.auth.uid == uid;
+   allow update, delete: if false;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

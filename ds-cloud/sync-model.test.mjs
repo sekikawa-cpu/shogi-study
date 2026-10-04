@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {projectRecord,mergeOperation} from './sync-model.js';
+const old={store:'quizzes',key:'q1',data:{seen:10,correct:8,flagged:false,lastSeen:'2026-10-04T12:00:00Z'},at:'2026-10-04T12:00:00Z'};
+const a={store:'quizzes',key:'q1',data:{seen:11,correct:9,flagged:true,lastSeen:'2026-10-04T12:10:00Z'},seenDelta:1,correctDelta:1,at:'2026-10-04T12:10:00Z',deviceId:'a'};
+const b={...a,data:{seen:11,correct:8,flagged:false,lastSeen:'2026-10-04T12:11:00Z'},correctDelta:0,at:'2026-10-04T12:11:00Z',deviceId:'b'};
+const ab=mergeOperation(b,mergeOperation(a,old));
+const ba=mergeOperation(a,mergeOperation(b,old));
+assert.deepEqual(ab.data,ba.data);assert.equal(ab.data.seen,12);assert.equal(ab.data.correct,9);assert.equal(ab.data.flagged,false);
+const settings={store:'kv',key:'settings',data:{k:'settings',v:{theme:'dark'}},at:'2026-10-04T12:20:00Z'};
+assert.deepEqual(mergeOperation({...settings,data:{k:'settings',v:{theme:'light'}},at:'2026-10-04T12:10:00Z'},settings).data,settings.data);
+assert.equal(mergeOperation({...a,data:null},old).data,null);
+const q=projectRecord('quizzes',{id:'q1',stem:'private text',seen:2,correct:1});assert.equal(q.stem,undefined);assert.equal(q.seen,2);
+assert.deepEqual(projectRecord('notes',{id:'seed-note-x',body:'private text',read:true,lastRead:'today'}),{read:true,lastRead:'today'});
+assert.equal(projectRecord('cards',{id:'custom',front:'my own note'}).front,'my own note');
+console.log('PASS: two-device counters, offline edit ordering, deletion, progress-only projections');

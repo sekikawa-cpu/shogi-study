@@ -1,0 +1,5 @@
+/ds-study/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
