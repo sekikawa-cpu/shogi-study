@@ -86,7 +86,9 @@ async function start(u){
  const html=await new Response(stream).text();
  const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html))),b=>b.toString(16).padStart(2,'0')).join('');
  if(digest!==manifest.sha256)throw new Error('教材の整合性確認に失敗しました');
- frame.srcdoc=html;frame.hidden=false;el('gate').hidden=true;el('logout').hidden=false;status('進捗を読み込んでいます…');
+ // A same-origin blob document keeps hash links inside the study app. srcdoc
+ // resolves relative links against the public shell and would nest the login page.
+ frame.src=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));frame.hidden=false;el('gate').hidden=true;el('logout').hidden=false;status('進捗を読み込んでいます…');
 }
 el('login').onclick=async()=>{
  el('login').disabled=true;message('Googleログイン画面を開いています…');
