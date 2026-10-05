@@ -1,11 +1,12 @@
-import { createCipheriv, pbkdf2Sync, randomBytes } from "node:crypto";
+import { createCipheriv, createHash, pbkdf2Sync, randomBytes } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
 const sourceRoot = "C:/Apps/書籍/webapp";
 const outputFile = "C:/Apps/shogi-study/public/books-study/encrypted.bundle";
-const passphraseFile = "C:/Apps/書籍/book-app-passphrase.txt";
+const ownerUidFile = "C:/Apps/書籍/book-app-owner-uid.txt";
+const ownerEmail = "sekikawa0301@gmail.com";
 const allowedRootFiles = new Set([
   "index.html", "library.css", "books.js", "book.html", "book-dashboard.js",
   "book-loader.js", "text.html", "style.css", "app.js", "diagram-enhancer.js",
@@ -32,15 +33,9 @@ async function collect(directory, prefix = "") {
 }
 
 await fs.mkdir(path.dirname(outputFile), { recursive: true });
-let passphrase;
-try {
-  passphrase = (await fs.readFile(passphraseFile, "utf8")).trim();
-  if (passphrase.length < 16) throw new Error("The saved passphrase is missing or too short; refusing to replace the existing encrypted bundle.");
-} catch (error) {
-  if (error.code !== "ENOENT") throw error;
-  passphrase = randomBytes(24).toString("base64url");
-  await fs.writeFile(passphraseFile, `${passphrase}\n`, { mode: 0o600 });
-}
+const ownerUid = (await fs.readFile(ownerUidFile, "utf8")).trim();
+if (!/^[A-Za-z0-9_-]{20,}$/.test(ownerUid)) throw new Error("The local owner UID file is missing or invalid.");
+const passphrase = createHash("sha256").update(`book-app-v2:${ownerUid}:${ownerEmail}`).digest("base64url");
 
 const files = {};
 for (const item of await collect(sourceRoot)) {
@@ -56,4 +51,4 @@ const encrypted = Buffer.concat([cipher.update(compressed), cipher.final()]);
 const tag = cipher.getAuthTag();
 const header = Buffer.concat([Buffer.from("BOOKAPP1"), salt, iv, tag]);
 await fs.writeFile(outputFile, Buffer.concat([header, encrypted]));
-console.log(JSON.stringify({ files: Object.keys(files).length, rawBytes: payload.length, compressedBytes: compressed.length, encryptedBytes: header.length + encrypted.length, outputFile, passphraseFile }, null, 2));
+console.log(JSON.stringify({ files: Object.keys(files).length, rawBytes: payload.length, compressedBytes: compressed.length, encryptedBytes: header.length + encrypted.length, outputFile, keyMode: "firebase-owner" }, null, 2));
