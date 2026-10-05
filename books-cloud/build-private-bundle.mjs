@@ -35,7 +35,9 @@ await fs.mkdir(path.dirname(outputFile), { recursive: true });
 let passphrase;
 try {
   passphrase = (await fs.readFile(passphraseFile, "utf8")).trim();
-} catch {
+  if (passphrase.length < 16) throw new Error("The saved passphrase is missing or too short; refusing to replace the existing encrypted bundle.");
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
   passphrase = randomBytes(24).toString("base64url");
   await fs.writeFile(passphraseFile, `${passphrase}\n`, { mode: 0o600 });
 }
