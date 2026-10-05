@@ -6,7 +6,6 @@ import path from "node:path";
 const sourceRoot = "C:/Apps/書籍/webapp";
 const outputFile = "C:/Apps/shogi-study/public/books-study/encrypted.bundle";
 const ownerUidFile = "C:/Apps/書籍/book-app-owner-uid.txt";
-const ownerEmail = "sekikawa0301@gmail.com";
 const allowedRootFiles = new Set([
   "index.html", "library.css", "books.js", "book.html", "book-dashboard.js",
   "book-loader.js", "text.html", "style.css", "app.js", "diagram-enhancer.js",
@@ -35,7 +34,7 @@ async function collect(directory, prefix = "") {
 await fs.mkdir(path.dirname(outputFile), { recursive: true });
 const ownerUid = (await fs.readFile(ownerUidFile, "utf8")).trim();
 if (!/^[A-Za-z0-9_-]{20,}$/.test(ownerUid)) throw new Error("The local owner UID file is missing or invalid.");
-const passphrase = createHash("sha256").update(`book-app-v2:${ownerUid}:${ownerEmail}`).digest("base64url");
+const passphrase = createHash("sha256").update(`book-app-v3:${ownerUid}`).digest("base64url");
 
 const files = {};
 for (const item of await collect(sourceRoot)) {

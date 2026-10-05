@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-const OWNER_EMAIL="sekikawa0301@gmail.com";
+const OWNER_UID="OFo1aUOLQedxLsCDspCHqnDrUSw2";
 const firebaseConfig={apiKey:"AIzaSyCLUzsM9MtQMm72SNHwdcSMLxMosiHsqp4",authDomain:"shogi-study.com",projectId:"ds-study-705f8",messagingSenderId:"992364001386",appId:"1:992364001386:web:34d9ba4baf27cc16e2b213"};
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app); const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
@@ -12,7 +12,7 @@ let currentUser=null;
 
 function setMessage(text){message.textContent=text;status.textContent=text}
 async function clearPrivate(){await Promise.all([caches.delete("books-private-v1"),caches.delete("books-private-v2"),caches.delete(CACHE_NAME)]); navigator.serviceWorker.controller?.postMessage({type:"CLEAR_PRIVATE_BOOKS"}); frame.hidden=true;frame.removeAttribute("src")}
-async function ownerSecret(user){const material=new TextEncoder().encode(`book-app-v2:${user.uid}:${user.email.toLowerCase()}`);const digest=await crypto.subtle.digest("SHA-256",material);return btoa(String.fromCharCode(...new Uint8Array(digest))).replaceAll("+","-").replaceAll("/","_").replaceAll("=","")}
+async function ownerSecret(user){const material=new TextEncoder().encode(`book-app-v3:${user.uid}`);const digest=await crypto.subtle.digest("SHA-256",material);return btoa(String.fromCharCode(...new Uint8Array(digest))).replaceAll("+","-").replaceAll("/","_").replaceAll("=","")}
 function bytesFromBase64(text){const raw=atob(text),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 async function decryptBundle(secret){
   setMessage("書籍データを安全に復号しています…");
@@ -35,4 +35,4 @@ redirect.addEventListener("click",()=>signInWithRedirect(auth,provider));
 logout.addEventListener("click",async()=>{await clearPrivate();await signOut(auth)});
 frame.addEventListener("load",()=>{if(!frame.hidden)status.textContent="本人確認済み・書籍ライブラリ表示中"});
 try{const registration=await navigator.serviceWorker.register("sw.js?v=3",{scope:APP_BASE});await registration.update();await navigator.serviceWorker.ready;await getRedirectResult(auth)}catch(e){setMessage(`初期化エラー: ${e.message}`)}
-onAuthStateChanged(auth,async user=>{currentUser=user;login.disabled=false;if(!user){await clearPrivate();gate.hidden=false;logout.hidden=true;login.hidden=false;redirect.hidden=false;setMessage("Googleアカウントでログインしてください。");return}if(!user.emailVerified||user.email?.toLowerCase()!==OWNER_EMAIL){await clearPrivate();await signOut(auth);setMessage("このGoogleアカウントには利用権限がありません。");return}logout.hidden=false;login.hidden=true;redirect.hidden=true;setMessage("本人確認が完了しました。書籍を準備しています…");try{await openBooks(user)}catch(error){setMessage(`書籍を開けませんでした: ${error.message}`)}});
+onAuthStateChanged(auth,async user=>{currentUser=user;login.disabled=false;if(!user){await clearPrivate();gate.hidden=false;logout.hidden=true;login.hidden=false;redirect.hidden=false;setMessage("Googleアカウントでログインしてください。");return}if(!user.emailVerified||user.uid!==OWNER_UID){await clearPrivate();await signOut(auth);setMessage("このGoogleアカウントには利用権限がありません。");return}logout.hidden=false;login.hidden=true;redirect.hidden=true;setMessage("本人確認が完了しました。書籍を準備しています…");try{await openBooks(user)}catch(error){setMessage(`書籍を開けませんでした: ${error.message}`)}});

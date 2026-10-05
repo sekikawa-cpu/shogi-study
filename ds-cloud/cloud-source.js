@@ -1,7 +1,7 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
-import {firebaseConfig,OWNER_EMAIL} from '../public/ds-study/config.js';
+import {firebaseConfig,OWNER_UID} from '../public/ds-study/config.js';
 import {projectRecord,mergeOperation} from './sync-model.js';
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app);
@@ -103,7 +103,7 @@ el('logout').onclick=async()=>{
 };
 onAuthStateChanged(auth,async u=>{
  if(!u){user=null;bridge=null;unsubscribe?.();frame.src='about:blank';if(privateUrl)URL.revokeObjectURL(privateUrl);privateUrl=null;frame.hidden=true;el('gate').hidden=false;el('logout').hidden=true;el('login').disabled=false;message('本人のGoogleアカウントでログインしてください。');status('ログインしていません');return;}
- if(u.email!==OWNER_EMAIL||!u.emailVerified){message('このアプリは所有者専用です。所有者のアカウントでログインしてください。');status('閲覧権限がありません');el('logout').hidden=false;return;}
+ if(u.uid!==OWNER_UID||!u.emailVerified){message('このアプリは所有者専用です。所有者のアカウントでログインしてください。');status('閲覧権限がありません');el('logout').hidden=false;return;}
  try{await start(u);}catch(e){message(e.message==='学習データがまだ登録されていません'?e.message:errorText(e));status('読み込みできませんでした');el('logout').hidden=false;}
 });
 window.addEventListener('online',()=>void flush());
