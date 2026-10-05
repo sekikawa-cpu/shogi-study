@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider, getRedirectResult, onAuthStateChanged, sig
 
 const OWNER_EMAIL="sekikawa0301@gmail.com";
 const firebaseConfig={apiKey:"AIzaSyCLUzsM9MtQMm72SNHwdcSMLxMosiHsqp4",authDomain:"shogi-study.com",projectId:"ds-study-705f8",messagingSenderId:"992364001386",appId:"1:992364001386:web:34d9ba4baf27cc16e2b213"};
-const app=initializeApp(firebaseConfig,"books-private-app");
+const app=initializeApp(firebaseConfig);
 const auth=getAuth(app); const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 const gate=document.querySelector("#gate"), frame=document.querySelector("#books"), status=document.querySelector("#status"), message=document.querySelector("#message"), login=document.querySelector("#login"), redirect=document.querySelector("#login-redirect"), logout=document.querySelector("#logout");
 const APP_BASE=new URL(".",location.href).pathname; const CACHE_NAME="books-private-v3";
