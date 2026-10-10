@@ -52,7 +52,6 @@ jobs:
           wrangler pages deploy dist \
             --project-name shogi-study \
             --branch main
-        continue-on-error: true
 
       - name: Show deployment status
         if: failure()
