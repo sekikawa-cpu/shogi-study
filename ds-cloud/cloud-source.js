@@ -1,13 +1,14 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
-import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {initializeFirestore,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {firebaseConfig,OWNER_UID} from '../public/ds-study/config.js';
-import {projectRecord,mergeOperation} from './sync-model.js';
+import {DS_APP_ID,isDSRecord,isLocalDSValue,projectRecord,mergeOperation} from './sync-model.js';
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app);
-const cloud=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+const cloud=initializeFirestore(app,{});
 const el=id=>document.getElementById(id),frame=el('study');
 let user=null,journal=null,bridge=null,unsubscribe=null,flushing=false,failed=false,privateUrl=null;
+const APP_ID=DS_APP_ID;
 const deviceId=localStorage.getItem('ds-cloud-device')||crypto.randomUUID();localStorage.setItem('ds-cloud-device',deviceId);
 const message=text=>{el('message').textContent=text;};
 const status=text=>{el('sync').textContent=text;};
@@ -17,11 +18,11 @@ const errorText=e=> e.code==='auth/popup-closed-by-user'?'ログイン画面が�
 function openJournal(uid){return new Promise((resolve,reject)=>{const r=indexedDB.open('ds-cloud-journal-'+uid,1);r.onupgradeneeded=()=>r.result.createObjectStore('outbox',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
 function journalTx(mode,fn){return new Promise((resolve,reject)=>{const t=journal.transaction('outbox',mode),r=fn(t.objectStore('outbox'));t.oncomplete=()=>resolve(r?.result);t.onerror=()=>reject(t.error);});}
 const queued=()=>journalTx('readonly',s=>s.getAll());
-const recordId=(s,key)=>encodeURIComponent(s+'|'+key);
+const recordId=(s,key)=>encodeURIComponent(APP_ID+'|'+s+'|'+key);
 async function enqueue(s,key,value,old){
  const data=projectRecord(s,value),prior=projectRecord(s,old||{});
  if(JSON.stringify(data)===JSON.stringify(prior))return;
- const op={id:crypto.randomUUID(),store:s,key:String(key),data,at:new Date().toISOString(),deviceId};
+ const op={id:crypto.randomUUID(),app:APP_ID,store:s,key:String(key),data,at:new Date().toISOString(),deviceId};
  if(s==='quizzes'&&data){op.seenDelta=Math.max(0,data.seen-(prior.seen||0));op.correctDelta=Math.max(0,data.correct-(prior.correct||0));}
  await journalTx('readwrite',os=>os.put(op));
  status(navigator.onLine?'保存しています…':'オフライン・端末に保存済み');
@@ -37,7 +38,7 @@ async function flush(){
     const done=await tx.get(receipt);if(done.exists())return;
     const existing=await tx.get(ref),remote=existing.exists()?existing.data():null;
     tx.set(ref,{...mergeOperation(op,remote),updatedAt:serverTimestamp()});
-    tx.set(receipt,{store:op.store,key:op.key,at:op.at,seenDelta:op.seenDelta||0,correctDelta:op.correctDelta||0,savedAt:serverTimestamp()});
+    tx.set(receipt,{app:APP_ID,store:op.store,key:op.key,at:op.at,seenDelta:op.seenDelta||0,correctDelta:op.correctDelta||0,savedAt:serverTimestamp()});
    });
    await journalTx('readwrite',os=>os.delete(op.id));
    if(bridge){const saved=await getDoc(ref);await apply({docChanges:()=>[{doc:saved}]});}
@@ -49,10 +50,13 @@ async function flush(){
 async function apply(snapshot){
  if(!bridge)return;
  const pending=await queued(),blocked=new Set(pending.map(x=>recordId(x.store,x.key)));
+ const changes=snapshot.docChanges();
+ const preferred=new Set(changes.map(change=>change.doc.data()).filter(x=>x.app===APP_ID).map(x=>x.store+'|'+x.key));
  let remoteChanged=false;
- for(const change of snapshot.docChanges()){
+ for(const change of changes){
   if(blocked.has(change.doc.id))continue;
-  const {store:s,key,data,deviceId:sourceDevice}=change.doc.data();if(!bridge.db.STORES[s])continue;
+  const raw=change.doc.data(),{app,store:s,key,data,deviceId:sourceDevice}=raw;
+  if(!bridge.db.STORES[s]||!isDSRecord(raw)||(app!==APP_ID&&preferred.has(s+'|'+key)))continue;
   if(sourceDevice!==deviceId)remoteChanged=true;
   const current=await bridge.db.get(s,key);
   const next=data===null?null:{...(current||{}),...data,[bridge.db.STORES[s].keyPath]:key};
@@ -63,13 +67,24 @@ async function apply(snapshot){
  bridge.emit();
  if(remoteChanged&&frame.contentWindow)frame.contentWindow.dispatchEvent(new frame.contentWindow.Event('ds-cloud-updated'));
 }
+async function pruneForeignLocalData(api){
+ for(const store of ['plan','logs','cards','notes','quizzes','scores']){
+  const list=api.state[store]||[];
+  for(let i=list.length-1;i>=0;i--){
+   const value=list[i];if(isLocalDSValue(store,value))continue;
+   await api.db.applyRemote(store,String(value.id),null);list.splice(i,1);
+  }
+ }
+}
 async function attach(api){
  bridge=api;
+ await pruneForeignLocalData(api);
  const refs=collection(cloud,'users',user.uid,'records');
  const snapshot=await getDocs(refs);await apply(snapshot);
  api.db.setObserver(enqueue);
  // The initial preferences and plan also need to be available on the second PC.
- if(snapshot.empty){await enqueue('kv','settings',{k:'settings',v:api.state.settings},null);for(const task of api.state.plan)await enqueue('plan',task.id,task,null);}
+ const hasAppRecords=snapshot.docs.some(item=>item.data().app===APP_ID);
+ if(!hasAppRecords){await enqueue('kv','settings',{k:'settings',v:api.state.settings},null);for(const task of api.state.plan)await enqueue('plan',task.id,task,null);}
  let chain=Promise.resolve();
  unsubscribe=onSnapshot(refs,snap=>{chain=chain.then(()=>apply(snap)).catch(e=>console.warn('Remote progress',e));},e=>status(errorText(e)));
  await journalTx('readonly',os=>os.count());void flush();
