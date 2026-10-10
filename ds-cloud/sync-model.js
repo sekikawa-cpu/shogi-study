@@ -1,13 +1,25 @@
 export const DS_APP_ID='ds';
 const DS_SUBJECTS=new Set(['ds','de','biz','all']);
+const DS_PLAN_SUBJECTS=new Set(['ds','de','biz']);
+
+export function isDSSettings(value){
+ const phases=value?.phases;
+ return Array.isArray(phases)&&phases.length>0&&phases.every(p=>
+  Array.isArray(p.tracks)&&p.tracks.length>0&&p.tracks.every(t=>DS_PLAN_SUBJECTS.has(t.s))
+ );
+}
 
 export function isDSRecord({app,store,key,data}){
- if(app!==undefined&&app!==null)return app===DS_APP_ID;
+ if(app!==undefined&&app!==null&&app!==DS_APP_ID)return false;
+ // Namespaced tombstones must remain applicable so deletions still synchronize.
+ if(app===DS_APP_ID&&data===null)return true;
  if(!data)return false;
- if(store==='kv')return key==='settings'&&Array.isArray(data.v?.phases)&&data.v.phases.some(p=>p.tracks?.some(t=>DS_SUBJECTS.has(t.s)));
- if(['plan','logs','cards','notes'].includes(store))return DS_SUBJECTS.has(data.subjectId);
+ if(store==='kv')return key==='settings'&&isDSSettings(data.v);
+ if(['plan','logs'].includes(store))return DS_SUBJECTS.has(data.subjectId);
+ if(store==='cards')return DS_SUBJECTS.has(data.subjectId)||(app===DS_APP_ID&&/^seed-card-/.test(String(key)));
+ if(store==='notes')return DS_SUBJECTS.has(data.subjectId)||(app===DS_APP_ID&&/^seed-note-/.test(String(key)));
  if(store==='scores')return DS_SUBJECTS.has(data.subjectId)||!!data.examKey;
- if(store==='quizzes')return DS_SUBJECTS.has(data.subjectId)||/^(?:seed-quiz-|ocr-|comp-)/.test(String(key));
+ if(store==='quizzes')return app===DS_APP_ID||DS_SUBJECTS.has(data.subjectId)||/^(?:seed-quiz-|ocr-|comp-)/.test(String(key));
  return false;
 }
 
