@@ -3,3 +3,13 @@
   Cache-Control: no-cache
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+/books-study/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
