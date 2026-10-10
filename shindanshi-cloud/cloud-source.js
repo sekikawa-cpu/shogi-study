@@ -1,11 +1,13 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
-import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {initializeFirestore,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {firebaseConfig,OWNER_UID} from '../public/ds-study/config.js';
 import {projectRecord,mergeOperation} from './sync-model.js';
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app);
-const cloud=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+// The app and durable outbox already use their own IndexedDB stores. Keeping
+// Firestore itself in memory avoids SDK-version cache conflicts across apps.
+const cloud=initializeFirestore(app,{});
 const el=id=>document.getElementById(id),frame=el('study');
 let user=null,journal=null,bridge=null,unsubscribe=null,flushing=false,failed=false,privateUrl=null;
 const APP_ID='shindanshi';
