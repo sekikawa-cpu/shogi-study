@@ -3,7 +3,7 @@ title: "盗まれた個人情報は、どこへ？ KADOKAWA事件から読み解
 description: "KADOKAWA事件を入口に、個人情報を盗む犯罪者の目的と手口、窃取後の恐喝・転売を解説。14集団の国との関係と2022～2026年の被害統計を、公表資料から読み解きます。"
 pubDate: "2026-10-12"
 author: "ただの会社員"
-categories: ["セキュリティ"]
+categories: ["AI・DX"]
 tags: ["サイバー攻撃", "個人情報漏えい", "KADOKAWA", "ランサムウェア"]
 section: "ai-dx"
 heroImage: "/images/ai-dx/personal-data-theft-cybercrime-kadokawa-2026/personal-data-theft-thumbnail.png"
