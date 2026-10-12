@@ -9,7 +9,7 @@ interface Props {
 const SITE_NAME = 'ただの会社員の生活日記';
 const SITE_DESCRIPTION = 'AI/DX推進部で働く会社員が、生成AI活用・資格学習・仕事術、そして趣味の将棋まで、実際にやってみたことを記録するブログです。';
 
-const { title = '', description = SITE_DESCRIPTION, image = '/images/profile.png', noindex = false } = Astro.props;
+const { title = '', description = SITE_DESCRIPTION, image = '/images/profile-illustration-20261012.png', noindex = false } = Astro.props;
 const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -58,7 +58,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         "@type": "Organization",
         "name": SITE_NAME,
         "url": String(Astro.site),
-        "logo": { "@type": "ImageObject", "url": new URL('/images/profile.png', Astro.site) }
+        "logo": { "@type": "ImageObject", "url": new URL('/images/profile-illustration-20261012.png', Astro.site) }
       }
     })} />
     <script type="application/ld+json" set:html={JSON.stringify({
@@ -66,7 +66,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       "@type": "Person",
       "name": "ただの会社員",
       "url": new URL('/about/', Astro.site),
-      "image": new URL('/images/profile.png', Astro.site),
+      "image": new URL('/images/profile-illustration-20261012.png', Astro.site),
       "description": "AI/DX推進部の副部長として働く会社員。生成AI活用・資格学習・キャリア形成、趣味の将棋についても発信。"
     })} />
   </head>
