@@ -49,5 +49,15 @@ const cipher = createCipheriv("aes-256-gcm", key, iv);
 const encrypted = Buffer.concat([cipher.update(compressed), cipher.final()]);
 const tag = cipher.getAuthTag();
 const header = Buffer.concat([Buffer.from("BOOKAPP1"), salt, iv, tag]);
-await fs.writeFile(outputFile, Buffer.concat([header, encrypted]));
+const bundle = Buffer.concat([header, encrypted]);
+const chunkSize = 20 * 1024 * 1024;
+const parts = [];
+const revision = createHash("sha256").update(bundle).digest("hex").slice(0,16);
+for (let offset = 0; offset < bundle.length; offset += chunkSize) {
+  const name = `encrypted-${revision}-${parts.length}.bundle`;
+  await fs.writeFile(path.join(path.dirname(outputFile), name), bundle.subarray(offset, offset + chunkSize));
+  parts.push(name);
+}
+await fs.writeFile(path.join(path.dirname(outputFile), "encrypted-manifest.json"), JSON.stringify({version:1,bytes:bundle.length,parts}));
+
 console.log(JSON.stringify({ files: Object.keys(files).length, rawBytes: payload.length, compressedBytes: compressed.length, encryptedBytes: header.length + encrypted.length, outputFile, keyMode: "firebase-owner" }, null, 2));
