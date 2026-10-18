@@ -8,7 +8,7 @@ const sourceRoot = "C:/Apps/書籍/webapp";
 const outputFile = "C:/Apps/shogi-study/public/books-study/encrypted.bundle";
 const ownerUidFile = "C:/Apps/書籍/book-app-owner-uid.txt";
 const allowedRootFiles = new Set([
-  "index.html", "library.css", "books.js", "book.html", "book-dashboard.js",
+  "index.html", "library.css", "library.js", "books.js", "book.html", "book-dashboard.js",
   "book-loader.js", "text.html", "style.css", "app.js", "diagram-enhancer.js",
   "diagram-library.js", "summary.html", "summary.css", "summary.js", "quiz.html",
   "quiz-play.html", "quiz-common.css", "quiz-common.js", "quiz-list.js", "quiz-play.js",
@@ -40,7 +40,7 @@ const passphrase = createHash("sha256").update(`book-app-v3:${ownerUid}`).digest
 
 const registryContext = {window:{}};
 vm.runInNewContext(await fs.readFile(path.join(sourceRoot,"books.js"),"utf8"),registryContext);
-const comicIds = new Set(registryContext.window.BOOKS.filter(book=>book.category === "manga").map(book=>book.id));
+const comicIds = new Set(registryContext.window.BOOKS.filter(book=>book.category === "manga" || book.captureBased).map(book=>book.id));
 const allFiles = await collect(sourceRoot);
 const groups = new Map([["core",[]], ...[...comicIds].map(id=>[id,[]])]);
 for (const item of allFiles) {
@@ -90,7 +90,7 @@ for(const [id,items] of groups){
 const core=await pack(groups.get("core"),{books});
 await fs.writeFile(path.join(path.dirname(outputFile),"encrypted-manifest.json"),JSON.stringify(core.manifest));
 await fs.writeFile("C:/Apps/shogi-study/public/admin/books-study/encrypted-manifest.json",JSON.stringify(core.manifest));
-console.log(JSON.stringify({coreFiles:core.count,coreBytes:core.manifest.bytes,comicBooks:Object.keys(books).length}));
+console.log(JSON.stringify({coreFiles:core.count,coreBytes:core.manifest.bytes,imageBooks:Object.keys(books).length}));
 // Remove obsolete generated chunks only within the fixed bundle directory.
 for(const name of await fs.readdir(path.dirname(outputFile))){
   if(/^encrypted-[a-f0-9]{16}-(?:[0-9]+\.bundle|manifest\.json)$/.test(name)&&!generated.has(name))
