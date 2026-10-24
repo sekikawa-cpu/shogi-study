@@ -21,11 +21,12 @@ async function decryptBundle(secret,manifestName="encrypted-manifest.json"){
   if(!manifestResponse.ok)throw new Error("書籍データ一覧を取得できませんでした。");
   const manifest=await manifestResponse.json();
   const bytes=new Uint8Array(manifest.bytes);let offset=0;
-  for(const part of manifest.parts){
+  const chunks=await Promise.all(manifest.parts.map(async part=>{
     if(!/^encrypted-[a-f0-9]{16}-[0-9]+\.bundle$/.test(part))throw new Error("書籍データの分割名が不正です。");
-    const response=await fetch(new URL((APP_BASE.startsWith("/admin/") ? "../../books-study/" : "./")+part,location.href),{cache:"no-store"});if(!response.ok)throw new Error("書籍データを取得できませんでした。");
-    const chunk=new Uint8Array(await response.arrayBuffer());bytes.set(chunk,offset);offset+=chunk.length;
-  }
+    const response=await fetch(new URL(part,bundleBase),{cache:"force-cache"});if(!response.ok)throw new Error("書籍データを取得できませんでした。");
+    return new Uint8Array(await response.arrayBuffer());
+  }));
+  for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
   if(offset!==manifest.bytes)throw new Error("書籍データのサイズが一致しません。");
   if(new TextDecoder().decode(bytes.slice(0,8))!=="BOOKAPP1")throw new Error("書籍データの形式が不正です。");
   const salt=bytes.slice(8,24),iv=bytes.slice(24,36),tag=bytes.slice(36,52),cipher=bytes.slice(52),combined=new Uint8Array(cipher.length+tag.length);combined.set(cipher);combined.set(tag,cipher.length);

@@ -40,12 +40,13 @@ const passphrase = createHash("sha256").update(`book-app-v3:${ownerUid}`).digest
 
 const registryContext = {window:{}};
 vm.runInNewContext(await fs.readFile(path.join(sourceRoot,"books.js"),"utf8"),registryContext);
-const comicIds = new Set(registryContext.window.BOOKS.filter(book=>book.category === "manga" || book.captureBased).map(book=>book.id));
+const comicIds = new Set(registryContext.window.BOOKS.map(book=>book.id));
+const coverFiles = new Set(registryContext.window.BOOKS.map(book=>book.cover));
 const allFiles = await collect(sourceRoot);
 const groups = new Map([["core",[]], ...[...comicIds].map(id=>[id,[]])]);
 for (const item of allFiles) {
-  const match = item.relative.match(/^books\/([^/]+)\/figures\//);
-  const group = match && comicIds.has(match[1]) ? match[1] : "core";
+  const match = item.relative.match(/^books\/([^/]+)\//);
+  const group = match && comicIds.has(match[1]) && !coverFiles.has(item.relative) ? match[1] : "core";
   groups.get(group).push(item);
 }
 const generated = new Set(["encrypted-manifest.json"]);
