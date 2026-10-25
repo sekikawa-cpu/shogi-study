@@ -40,5 +40,24 @@ export function createEditCloud(app,getUser){
   });
   if(user().uid!==uid)throw Error('ログイン状態が変更されました。');return {...payload,revision};
  }
- return {load,save,clear:()=>{remembered=null}};
+ async function saveBatch(book,changes){
+  if(!Array.isArray(changes)||!changes.length||changes.length>100||new Set(changes.map(c=>c.value?.key)).size!==changes.length)throw Error('一括編集は重複のない1〜100項目で指定してください。');
+  const uid=user().uid,key=await master(),prepared=[];let bytes=0;
+  for(const {value,expectedRevision}of changes){
+   if(typeof value?.key!=='string'||value.key.length>240)throw Error('編集項目が不正です。');
+   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value.key)),id=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+   const revision=crypto.randomUUID(),payload={...value};delete payload.revision;
+   const encrypted=await seal(payload,key,`${book}:${id}:${revision}`),chunks=[];
+   bytes+=encrypted.cipher.length;if(bytes>6000000)throw Error('一括編集のデータが大きすぎます。項目を分けて保存してください。');
+   for(let offset=0;offset<encrypted.cipher.length;offset+=600000)chunks.push(encrypted.cipher.slice(offset,offset+600000));
+   prepared.push({ref:doc(items(uid,book),id),revision,payload,encrypted,chunks,expectedRevision});
+  }
+  await runTransaction(db,async transaction=>{
+   const snapshots=await Promise.all(prepared.map(p=>transaction.get(p.ref)));
+   snapshots.forEach((previous,i)=>{if((previous.exists()?previous.data().revision:null)!==(prepared[i].expectedRevision||null))throw Error('別の端末で変更された項目があります。すべて保存せずに停止しました。クラウドから再読込後に編集してください。')});
+   prepared.forEach(p=>{p.chunks.forEach((cipher,index)=>transaction.set(doc(collection(p.ref,'chunks'),`${p.revision}-${index}`),{version:1,revision:p.revision,index,cipher}));transaction.set(p.ref,{version:1,revision:p.revision,iv:p.encrypted.iv,chunks:p.chunks.length,updatedAt:serverTimestamp()})});
+  });
+  if(user().uid!==uid)throw Error('ログイン状態が変更されました。');return prepared.map(p=>({...p.payload,revision:p.revision}));
+ }
+ return {load,save,saveBatch,clear:()=>{remembered=null}};
 }

@@ -12,7 +12,7 @@ const allowedRootFiles = new Set([
   "book-loader.js", "text.html", "style.css", "app.js", "diagram-enhancer.js",
   "diagram-library.js", "summary.html", "summary.css", "summary.js", "quiz.html",
   "quiz-play.html", "quiz-common.css", "quiz-common.js", "quiz-list.js", "quiz-play.js",
-  "progress-data.json", "book-editor.js", "reader-position.js", "book-editor.css"
+  "progress-data.json", "book-editor.js", "reader-position.js", "grid-editor.js", "grid-editor.css", "book-editor.css"
 ]);
 const allowedExtensions = new Set([".html", ".css", ".js", ".json", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"]);
 

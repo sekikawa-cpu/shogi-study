@@ -9,6 +9,7 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(fitHeader).observe(header);
  window.addEventListener('resize',fitHeader);fitHeader();
  let enabled=false,loading=false,saving=false,editing=null;const patches=new Map(),originals=new Map(),templates=new Map(),undo=[];
+ const gridButton=document.createElement('button');gridButton.textContent='一覧でまとめて編集';gridButton.hidden=true;header.insertBefore(gridButton,toolbar);
  const baseNav=structuredClone(NAV.sections),baseMode=NAV.navigationMode;
  const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node};
  const hash=async text=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),v=>v.toString(16).padStart(2,'0')).join('');
@@ -67,6 +68,19 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
   const saved=await rpc('SAVE_BOOK_EDIT',{value:{...value,key:original.key,page:original.page,beforeHash:await hash(original.before)},expectedRevision:previous?.revision||null});
   if(remember)undo.push({key:original.key,previous});patches.set(original.key,saved);undoButton.disabled=!undo.length;editing=null;await apply();status.textContent='クラウドに保存しました。別端末でも反映されます。';
  }
+ async function commitMany(changes,remember=true){
+  const values=[];for(const item of changes){const original=originals.get(item.key);if(!original)throw Error('編集項目が見つかりません。');values.push({value:{...item.value,key:original.key,page:original.page,beforeHash:await hash(original.before)},expectedRevision:patches.get(original.key)?.revision||null})}
+  const previous=changes.map(item=>({key:item.key,previous:patches.get(item.key)}));status.textContent='選択項目を暗号化してクラウドへまとめて保存しています…';
+  const records=await rpc('SAVE_BOOK_EDITS_BATCH',{changes:values});for(const record of records)patches.set(record.key,record);if(remember)undo.push({group:previous});undoButton.disabled=!undo.length;await apply();status.textContent=`${records.length}項目を保存しました。「直前の変更を取り消す」で一括して戻せます。`;
+ }
+ gridButton.onclick=()=>{
+  if(saving)return;if(editing){status.textContent='個別の編集を保存するか閉じてから、一覧編集を開いてください。';return}
+  const items=[];for(const [page,data]of Object.entries(PAGES)){const root=el('div');root.innerHTML=data.html||'';for(const node of root.querySelectorAll('[data-be-key]')){
+   const original=originals.get(node.dataset.beKey);if(!original)continue;const patch=patches.get(original.key),image=node.tagName==='IMG'?node:node.querySelector('img');
+   items.push({id:original.key,page:Number(page),text:original.isImage?'':node.textContent,type:original.isImage?'figure':/^H/.test(node.tagName)?'heading':({ASIDE:'note',BLOCKQUOTE:'quote',LI:'list',PRE:'code'}[node.tagName]||'paragraph'),level:/^H/.test(node.tagName)?Number(node.tagName.slice(1)):2,indent:patch?.indent||0,firstLine:patch?.firstLineIndent||0,toc:patch?.includeToc!==false,image:image?.src});
+  }}
+  window.ReadingGrid.openGridEditor({items,onSave:async rows=>{saving=true;try{await commitMany(rows.map(row=>({key:row.id,value:row.deleted?{deleted:true}:{text:row.text,kind:row.type,level:row.level,includeToc:row.type==='heading'&&row.toc!==false,indent:row.indent,firstLineIndent:row.firstLine}})))}finally{saving=false}}});
+ };
  function decorate(){
   container.querySelectorAll('.be-item-tools').forEach(n=>n.remove());if(!enabled)return;
   for(const node of container.querySelectorAll('[data-be-key]')){
@@ -112,9 +126,9 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
   action('原本の内容に戻す',()=>commit(original,{reset:true}));
   const cancel=el('button','編集を閉じる');cancel.onclick=()=>{const saved=window.ReaderPosition?.capturePosition(scroller);panel.remove();editing=null;window.ReaderPosition?.restorePosition(scroller,saved)};actions.append(cancel);panel.append(actions,error);window.ReaderPosition?.restorePosition(scroller,position);
  }
- toggle.onclick=()=>{const scroller=container.closest('.main-content')||container.parentElement,position=window.ReaderPosition?.capturePosition(scroller);enabled=!enabled;window.__beEditing=enabled;toggle.textContent=enabled?'編集を終了':'本文を編集';toggle.setAttribute('aria-pressed',enabled);if(!enabled){container.querySelectorAll('.be-panel').forEach(n=>n.remove());editing=null}refresh();decorate();window.ReaderPosition?.restorePosition(scroller,position)};
+ toggle.onclick=()=>{const scroller=container.closest('.main-content')||container.parentElement,position=window.ReaderPosition?.capturePosition(scroller);enabled=!enabled;gridButton.hidden=!enabled;window.__beEditing=enabled;toggle.textContent=enabled?'編集を終了':'本文を編集';toggle.setAttribute('aria-pressed',enabled);if(!enabled){container.querySelectorAll('.be-panel').forEach(n=>n.remove());editing=null}refresh();decorate();window.ReaderPosition?.restorePosition(scroller,position)};
  toolbar.querySelector('.be-reload').onclick=()=>{if(editing&&!confirm('未保存の入力を閉じてクラウドから読み込みますか？'))return;load()};
- undoButton.onclick=async()=>{const item=undo.at(-1);if(!item)return;const original=originals.get(item.key);try{undoButton.disabled=true;await commit(original,item.previous?{...item.previous}:{reset:true},false);undo.pop();undoButton.disabled=!undo.length}catch(e){status.textContent=e.message;undoButton.disabled=false}};
+ undoButton.onclick=async()=>{const item=undo.at(-1);if(!item||saving)return;try{saving=true;undoButton.disabled=true;if(item.group)await commitMany(item.group.map(v=>({key:v.key,value:v.previous?{...v.previous}:{reset:true}})),false);else await commit(originals.get(item.key),item.previous?{...item.previous}:{reset:true},false);undo.pop();undoButton.disabled=!undo.length}catch(e){status.textContent=e.message;undoButton.disabled=false}finally{saving=false}};
  document.addEventListener('book-reader-rendered',decorate);
  async function load(){if(loading)return;loading=true;toggle.disabled=true;status.textContent='クラウドの編集内容を読み込んでいます…';try{const records=await rpc('LOAD_BOOK_EDITS');patches.clear();for(const record of records)patches.set(record.key,record);undo.length=0;undoButton.disabled=true;editing=null;await apply();toggle.disabled=false}catch(e){status.textContent='クラウド編集を読み込めませんでした：'+e.message}finally{loading=false}}
  await load();
