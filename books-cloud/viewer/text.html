@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本文版ビューア</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%93%9A</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="book-editor.css?v=1">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="book.html" class="icon-btn" id="homeBtn" title="トップページへ">🏠</a>
+  <button id="navToggleBtn" class="icon-btn" title="目次の表示切替">☰</button>
+  <div class="book-title">本文版</div>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="本文を検索…" autocomplete="off">
+    <div id="searchResults" class="search-results hidden"></div>
+  </div>
+  <button id="memoListBtn" class="icon-btn" title="メモ一覧">📝<span id="memoCount" class="badge hidden">0</span></button>
+</header>
+
+<div class="layout">
+  <nav id="sidebar" class="sidebar">
+    <div id="navTree" class="nav-tree"></div>
+  </nav>
+
+  <main id="mainContent" class="main-content">
+    <div class="breadcrumb" id="breadcrumb"></div>
+
+    <div class="page-frame">
+      <div class="pages-scroll" id="pagesContainer"></div>
+    </div>
+  </main>
+</div>
+
+<div class="scroll-indicator" id="scrollIndicator">
+  <span id="currentPageLabel">読書進捗 0%</span>
+</div>
+
+<div id="memoPopup" class="memo-popup hidden">
+  <button id="addMemoBtn">+ メモを追加</button>
+</div>
+
+<div id="memoEditor" class="memo-editor hidden">
+  <div class="memo-editor-box">
+    <p class="memo-editor-quote" id="memoEditorQuote"></p>
+    <textarea id="memoEditorText" placeholder="メモを入力…"></textarea>
+    <div class="memo-editor-actions">
+      <button id="memoSaveBtn" class="primary-btn">保存</button>
+      <button id="memoDeleteBtn" class="danger-btn hidden">削除</button>
+      <button id="memoCancelBtn">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div id="memoListPanel" class="memo-list-panel hidden">
+  <div class="memo-list-header">
+    <h3>メモ一覧</h3>
+    <button id="memoListCloseBtn" class="icon-btn">×</button>
+  </div>
+  <div id="memoListBody" class="memo-list-body"></div>
+</div>
+
+<div id="overlay" class="overlay hidden"></div>
+
+<script src="book-loader.js"></script>
+<script src="diagram-enhancer.js?v=9"></script>
+<script src="diagram-library.js?v=1"></script>
+<script src="book-editor.js?v=1"></script>
+<script src="app.js?v=8"></script>
+<script>
+  const bookId = getBookId();
+  loadScripts(["books/" + bookId + "/nav.js", "books/" + bookId + "/text-data.js", "books/" + bookId + "/diagram-specs.js"],
+    () => initTextViewer(bookId));
+</script>
+</body>
+</html>

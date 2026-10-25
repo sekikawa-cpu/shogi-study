@@ -16,6 +16,34 @@ service cloud.firestore {
    allow read, create: if owner() && request.auth.uid == uid;
    allow update, delete: if false;
   }
+  match /users/{uid}/bookEditKeys/master {
+   allow read: if owner() && request.auth.uid == uid;
+   allow create: if owner() && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly(['version','key'])
+    && request.resource.data.version == 1 && request.resource.data.key is string
+    && request.resource.data.key.size() == 44;
+   allow update, delete: if false;
+  }
+  match /users/{uid}/bookEdits/{book}/items/{item} {
+   allow read: if owner() && request.auth.uid == uid;
+   allow create, update: if owner() && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly(['version','revision','iv','chunks','updatedAt'])
+    && request.resource.data.version == 1 && request.resource.data.revision is string
+    && request.resource.data.revision.size() == 36 && request.resource.data.iv is string
+    && request.resource.data.iv.size() == 16 && request.resource.data.chunks is int
+    && request.resource.data.chunks > 0 && request.resource.data.chunks <= 16
+    && request.resource.data.updatedAt == request.time;
+   match /chunks/{chunk} {
+    allow read: if owner() && request.auth.uid == uid;
+    allow create: if owner() && request.auth.uid == uid
+     && request.resource.data.keys().hasOnly(['version','revision','index','cipher'])
+     && request.resource.data.version == 1 && request.resource.data.revision is string
+     && request.resource.data.revision.size() == 36 && request.resource.data.index is int
+     && request.resource.data.index >= 0 && request.resource.data.index < 16
+     && request.resource.data.cipher is string && request.resource.data.cipher.size() <= 600000;
+    allow update, delete: if false;
+   }
+  }
   match /{document=**} { allow read, write: if false; }
  }
 }

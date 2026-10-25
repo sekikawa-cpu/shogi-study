@@ -9,10 +9,12 @@ const gate=document.querySelector("#gate"), frame=document.querySelector("#books
 const APP_BASE=new URL(".",location.href).pathname; const CACHE_NAME="books-private-v3";
 const mime={html:"text/html;charset=utf-8",css:"text/css;charset=utf-8",js:"text/javascript;charset=utf-8",json:"application/json;charset=utf-8",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",svg:"image/svg+xml",webp:"image/webp"};
 let currentUser=null;let sessionEpoch=0;let bookManifests={};const bookLoads=new Map();
+let editCloud=null;
+async function getEditCloud(){if(!editCloud){const {createEditCloud}=await import('./edit-cloud.js?v=1');editCloud=createEditCloud(app,()=>currentUser?.uid===OWNER_UID?currentUser:null)}return editCloud}
 const bundleBase=new URL(APP_BASE.startsWith("/admin/")?"../../books-study/":"./",location.href);
 
 function setMessage(text){message.textContent=text;status.textContent=text}
-async function clearPrivate(){sessionEpoch++;bookManifests={};bookLoads.clear();await Promise.all([caches.delete("books-private-v1"),caches.delete("books-private-v2"),caches.delete(CACHE_NAME)]); navigator.serviceWorker.controller?.postMessage({type:"CLEAR_PRIVATE_BOOKS"}); frame.hidden=true;frame.removeAttribute("src")}
+async function clearPrivate(){editCloud?.clear();sessionEpoch++;bookManifests={};bookLoads.clear();await Promise.all([caches.delete("books-private-v1"),caches.delete("books-private-v2"),caches.delete(CACHE_NAME)]); navigator.serviceWorker.controller?.postMessage({type:"CLEAR_PRIVATE_BOOKS"}); frame.hidden=true;frame.removeAttribute("src")}
 async function ownerSecret(user){const material=new TextEncoder().encode(`book-app-v3:${user.uid}`);const digest=await crypto.subtle.digest("SHA-256",material);return btoa(String.fromCharCode(...new Uint8Array(digest))).replaceAll("+","-").replaceAll("/","_").replaceAll("=","")}
 function bytesFromBase64(text){const raw=atob(text),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 async function decryptBundle(secret,manifestName="encrypted-manifest.json"){
@@ -68,3 +70,14 @@ logout.addEventListener("click",async()=>{await clearPrivate();await signOut(aut
 frame.addEventListener("load",()=>{if(!frame.hidden)status.textContent="本人確認済み・書籍ライブラリ表示中"});
 try{const registration=await navigator.serviceWorker.register("sw.js?v=3",{scope:APP_BASE});await registration.update();await navigator.serviceWorker.ready;await getRedirectResult(auth)}catch(e){setMessage(`初期化エラー: ${e.message}`)}
 onAuthStateChanged(auth,async user=>{currentUser=user;login.disabled=false;if(!user){await clearPrivate();gate.hidden=false;logout.hidden=true;login.hidden=false;redirect.hidden=false;setMessage("Googleアカウントでログインしてください。");return}if(!user.emailVerified||user.uid!==OWNER_UID){await clearPrivate();await signOut(auth);setMessage("このGoogleアカウントには利用権限がありません。");return}logout.hidden=false;login.hidden=true;redirect.hidden=true;setMessage("本人確認が完了しました。書籍を準備しています…");try{await openBooks(user)}catch(error){setMessage(`書籍を開けませんでした: ${error.message}`)}});
+
+window.addEventListener("message",async event=>{
+ if(event.origin!==location.origin||event.source!==frame.contentWindow||!["LOAD_BOOK_EDITS","SAVE_BOOK_EDIT"].includes(event.data?.type))return;
+ const {bookId,requestId,value,expectedRevision}=event.data;
+ if(!/^[a-zA-Z0-9_-]{1,80}$/.test(bookId)||typeof requestId!=="string")return;
+ let result,error;
+ try{if(!currentUser?.emailVerified||currentUser.uid!==OWNER_UID)throw Error("再ログインしてください。");
+ const editor=await getEditCloud();result=event.data.type==="LOAD_BOOK_EDITS"?await editor.load(bookId):await editor.save(bookId,value,expectedRevision);
+ }catch(e){error=e.message||"クラウド保存に失敗しました。"}
+ if(event.source===frame.contentWindow)event.source.postMessage({type:"BOOK_EDIT_RESULT",requestId,result,error},location.origin);
+});
