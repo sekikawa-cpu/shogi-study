@@ -2,8 +2,12 @@
 window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
  if(window.__bookEditorInstalled)return;window.__bookEditorInstalled=true;
  const toolbar=document.createElement('div');toolbar.className='be-toolbar';toolbar.innerHTML='<span class="be-status" role="status">クラウドの編集内容を確認しています…</span><button class="be-reload">クラウドから再読込</button><button class="be-undo" disabled>直前の変更を取り消す</button>';
- container.before(toolbar);const status=toolbar.querySelector('.be-status'),undoButton=toolbar.querySelector('.be-undo');
- const toggle=document.createElement('button');toggle.className='be-toggle';toggle.textContent='本文を編集';toggle.disabled=true;document.querySelector('.topbar').append(toggle);
+ const header=document.querySelector('.topbar');header.classList.add('be-header');const status=toolbar.querySelector('.be-status'),undoButton=toolbar.querySelector('.be-undo');
+ const toggle=document.createElement('button');toggle.className='be-toggle';toggle.textContent='本文を編集';toggle.disabled=true;header.append(toggle,toolbar);
+ // Keep the reading area below the fixed header, including wrapped mobile rows.
+ const fitHeader=()=>document.documentElement.style.setProperty('--topbar-h',Math.ceil(header.getBoundingClientRect().height)+'px');
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(fitHeader).observe(header);
+ window.addEventListener('resize',fitHeader);fitHeader();
  let enabled=false,loading=false,saving=false,editing=null;const patches=new Map(),originals=new Map(),templates=new Map(),undo=[];
  const baseNav=structuredClone(NAV.sections),baseMode=NAV.navigationMode;
  const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node};
