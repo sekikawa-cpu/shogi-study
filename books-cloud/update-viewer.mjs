@@ -11,8 +11,8 @@ const uid=(await fs.readFile('C:/Apps/書籍/book-app-owner-uid.txt','utf8')).tr
 const secret=createHash('sha256').update('book-app-v3:'+uid).digest('base64url');
 function unpack(bytes){const cipher=createDecipheriv('aes-256-gcm',pbkdf2Sync(secret,bytes.subarray(8,24),600000,32,'sha256'),bytes.subarray(24,36));cipher.setAuthTag(bytes.subarray(36,52));return JSON.parse(gunzipSync(Buffer.concat([cipher.update(bytes.subarray(52)),cipher.final()])))}
 const original=unpack(Buffer.concat(await Promise.all(manifest.parts.map(n=>{if(!/^encrypted-[a-f0-9]{16}-\d+\.bundle$/.test(n))throw Error('Invalid part');return fs.readFile(path.join(dir,n))}))));
-const payload=structuredClone(original),names=['text.html','app.js','book-editor.js','book-editor.css','library.js','library.css','reader-position.js','grid-editor.js','grid-editor.css'];
-for(const name of names)payload.files[name]=(await fs.readFile(path.join(root,'books-cloud/viewer',name))).toString('base64');
+const payload=structuredClone(original),names=['text.html','app.js','book-editor.js','book-editor.css','library.js','library.css','reader-position.js','grid-editor.js','grid-editor.css','comic-reading.js','comic-reading.css','comic-layouts.js'];
+for(const name of names)payload.files[name]=(await fs.readFile(name==='comic-layouts.js'?'C:/Apps/書籍/webapp/comic-layouts.js':path.join(root,'books-cloud/viewer',name))).toString('base64');
 const coverOption=process.argv.indexOf('--cover');
 if(coverOption!==-1){
  const config=JSON.parse(await fs.readFile(process.argv[coverOption+1],'utf8'));

@@ -18,7 +18,7 @@ var ReaderPosition = (() => {
   };
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // frontend/src/reader-position.ts
+  // books-cloud/viewer/reader-position.ts
   var reader_position_exports = {};
   __export(reader_position_exports, {
     capturePosition: () => capturePosition,
@@ -52,6 +52,10 @@ var ReaderPosition = (() => {
     if (!root) return null;
     const list = nodes(root), view = bounds(root);
     let prefix = 0;
+    for (const image of root.querySelectorAll(".capture-piece[id]")) {
+      const box = image.getBoundingClientRect();
+      if (box.height && box.bottom > view.top + 2 && box.top < view.bottom) return { index: 0, context: "", captureId: image.id, offset: box.top - view.top, scroll: root.scrollTop, outer: scrollY };
+    }
     for (const panel of root.querySelectorAll(".be-panel,.inline-book-editor,.inline-image-editor")) {
       const box = panel.getBoundingClientRect(), visible = Math.min(box.bottom, view.bottom) - Math.max(box.top, view.top);
       if (visible < (view.bottom - view.top) * 0.45) continue;
@@ -93,6 +97,14 @@ var ReaderPosition = (() => {
       const behavior = root.style.scrollBehavior;
       root.style.scrollBehavior = "auto";
       window.scrollTo(window.scrollX, saved.outer);
+      if (saved.captureId) {
+        const image = document.getElementById(saved.captureId);
+        if (image && root.contains(image)) {
+          root.scrollTop += image.getBoundingClientRect().top - (bounds(root).top + saved.offset);
+          root.style.scrollBehavior = behavior;
+          return;
+        }
+      }
       if (!saved.context) {
         root.scrollTop = saved.scroll;
         root.style.scrollBehavior = behavior;

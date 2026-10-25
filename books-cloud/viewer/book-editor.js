@@ -36,6 +36,8 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
    const original=originals.get(patch.key);if(!original||await hash(original.before)!==patch.beforeHash){conflicts++;continue}
    const node=roots.get(String(original.page)).querySelector('[data-be-key="'+CSS.escape(patch.key)+'"]');if(!node)continue;
    if(patch.deleted){const placeholder=el('span');placeholder.dataset.beRemoved='true';node.replaceWith(placeholder);continue}
+   if(['spread','split','single'].includes(patch.captureLayout))node.dataset.captureLayout=patch.captureLayout;
+   else delete node.dataset.captureLayout;
    if(patch.image){
     if(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(patch.image)){conflicts++;continue}
     const image=node.tagName==='IMG'?node:node.querySelector('img');if(image){image.src=patch.image;image.removeAttribute('srcset');image.removeAttribute('width');image.removeAttribute('height')}
@@ -86,6 +88,11 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
   for(const node of container.querySelectorAll('[data-be-key]')){
    const original=originals.get(node.dataset.beKey);if(!original)continue;
    const tools=el('div');tools.className='be-item-tools';const button=el('button',original.isImage?'この画像を編集':/^H/.test(node.tagName)?'この見出しを編集':'この本文を編集');button.onclick=()=>open(original,node,tools);tools.append(button);node.after(tools);
+   if(NAV.captureReading&&original.isImage&&node.matches('figure.comic-page')){
+    const label=el('label','ページ表示');label.className='capture-layout-control';const select=el('select');select.setAttribute('aria-label','キャプチャ '+original.page+' のページ表示');
+    for(const [value,text]of [['auto','自動判定'],['spread','見開きを保持'],['split','1ページずつ（右→左）'],['single','画像全体を1ページで表示']]){const option=el('option',text);option.value=value;select.append(option)}
+    select.value=patches.get(original.key)?.captureLayout||'auto';select.onchange=async()=>{select.disabled=true;try{await commit(original,{...patches.get(original.key),captureLayout:select.value,reset:false})}catch(error){status.textContent=error.message;select.disabled=false}};label.append(select);tools.append(label);
+   }
   }
  }
  function open(original,node,tools){

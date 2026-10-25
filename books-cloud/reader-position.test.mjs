@@ -18,4 +18,7 @@ test('paragraph splitting does not change the anchored reading position',()=>{
 test('later image corrections stop as soon as the user scrolls',()=>{
  const{d,w,root}=setup();try{const saved=w.ReaderPosition.capturePosition(root);const img=w.document.createElement('img');Object.defineProperty(img,'complete',{value:false});root.append(img);const cancel=w.ReaderPosition.restorePosition(root,saved);root.dispatchEvent(new w.Event('wheel'));root.scrollTop=30;img.dispatchEvent(new w.Event('load'));assert.equal(root.scrollTop,30);cancel()}finally{d.window.close()}
 });
+test('image-only comic keeps the same visible page through edit mode',()=>{
+ const{d,w,root}=setup();try{root.innerHTML='<div class="capture-piece" id="capture-4-left"></div>';let top=-80;root.firstElementChild.getBoundingClientRect=()=>({top,bottom:920,height:1000});const saved=w.ReaderPosition.capturePosition(root);assert.equal(saved.captureId,'capture-4-left');top=140;w.ReaderPosition.restorePosition(root,saved);assert.equal(root.scrollTop,340)}finally{d.window.close()}
+});
 

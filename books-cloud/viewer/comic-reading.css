@@ -1,0 +1,10 @@
+.page-content.capture-reading{background:#fff;padding-top:24px!important}
+.capture-reading .capture-book-title{font-size:1.6rem;line-height:1.6;margin:0 0 24px;text-align:center}
+.capture-reading figure.comic-page{margin:0!important;padding:0!important;width:100%;max-width:none!important;break-inside:auto}
+.capture-reading .capture-piece{box-sizing:border-box;border-top:1px solid #e1e4e8;padding:12px 0;margin:0 auto;max-width:100%}
+.capture-reading .capture-single{width:min(100%,850px)}
+.capture-reading .capture-spread{width:100%}
+.capture-reading .capture-viewport{position:relative;overflow:hidden;width:100%;background:#fff}
+.capture-reading .capture-viewport img{display:block;width:100%;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.capture-reading .capture-viewport img.capture-positioned{position:absolute;top:0;object-fit:fill!important}
+.capture-layout-control{display:inline-flex;gap:8px;align-items:center;margin-left:8px;font-size:.85rem}

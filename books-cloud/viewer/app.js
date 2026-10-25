@@ -3,6 +3,7 @@ window.initTextViewer = function(bookId){
 
 const NAV = window.NAV;
 const PAGES = window.PAGES || {};
+window.ComicReading?.configure(bookId,NAV);
 const TOTAL = NAV.totalPages;
 const MEMO_KEY = bookId + "-memos-v1";
 const BATCH_SIZE = 12;          // pages rendered per incremental step
@@ -169,6 +170,7 @@ function renderAllPages(){
   content.className = "page-content continuous-content";
   if(NAV.presentation === "quality-v3") content.classList.add("structured-book");
   content.innerHTML = fullHtml;
+  window.ComicReading?.render(content,bookId,NAV);
   if(NAV.navigationMode === "structured" && !window.__beEditing){
     for(let p=2;p<=TOTAL;p++){
       if(!PAGES[p] || !PAGES[p].joinPrevious) continue;
@@ -276,6 +278,7 @@ navToggleBtn.addEventListener("click", ()=>{
 let searchIndex = null;
 function buildSearchIndex(){
   searchIndex = [];
+  if(NAV.captureReading){searchIndex=NAV.sections.map(section=>({page:section.startFile,text:section.title,section}));return;}
   for(let p=1; p<=TOTAL; p++){
     const d = PAGES[p];
     if(d && d.text){
@@ -297,7 +300,7 @@ function doSearch(query){
       let snippet = (start>0?"…":"") + item.text.slice(start,end) + (end<item.text.length?"…":"");
       snippet = escapeHtml(snippet).replace(new RegExp(escapeRegExp(escapeHtml(query)),"gi"), m=>"<mark>"+m+"</mark>");
       const sec = findSectionForPage(item.page);
-      results.push({page:item.page, snippet, secTitle: sec?sec.title:""});
+      results.push({page:item.page, snippet, secTitle: item.section?.title||(sec?sec.title:""),section:item.section});
       if(results.length >= 40) break;
     }
   }
@@ -313,9 +316,9 @@ function renderSearchResults(results, query){
         '<div class="sr-snippet">'+r.snippet+'</div>' +
       '</div>'
     )).join("");
-    searchResultsEl.querySelectorAll(".sr-item").forEach(el=>{
+    searchResultsEl.querySelectorAll(".sr-item").forEach((el,index)=>{
       el.addEventListener("click", ()=>{
-        scrollToPage(parseInt(el.dataset.page,10));
+        if(results[index].section)scrollToSection(results[index].section);else scrollToPage(parseInt(el.dataset.page,10));
         searchResultsEl.classList.add("hidden");
         searchInput.value = "";
       });

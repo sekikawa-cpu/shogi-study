@@ -1,4 +1,4 @@
-export type ReadingPosition={index:number;context:string;offset:number;scroll:number;outer:number};
+export type ReadingPosition={index:number;context:string;offset:number;scroll:number;outer:number;captureId?:string};
 const excluded='button,input,textarea,select,script,style,.be-panel,.be-item-tools,.inline-book-editor,.inline-image-editor,.inline-edit-banner,.breadcrumb,.deleted-item-notice';
 const restores=new WeakMap<HTMLElement,()=>void>();
 const compact=(text:string)=>text.replace(/\s/g,'');
@@ -18,6 +18,9 @@ function bounds(root:HTMLElement){
 function rect(node:Text,start=0,end=node.length){const range=document.createRange();range.setStart(node,start);range.setEnd(node,Math.min(end,node.length));return range.getBoundingClientRect?range.getBoundingClientRect():node.parentElement!.getBoundingClientRect()}
 export function capturePosition(root:HTMLElement|null):ReadingPosition|null{
  if(!root)return null;const list=nodes(root),view=bounds(root);let prefix=0;
+ for(const image of root.querySelectorAll<HTMLElement>('.capture-piece[id]')){
+  const box=image.getBoundingClientRect();if(box.height&&box.bottom>view.top+2&&box.top<view.bottom)return{index:0,context:'',captureId:image.id,offset:box.top-view.top,scroll:root.scrollTop,outer:scrollY};
+ }
  for(const panel of root.querySelectorAll<HTMLElement>('.be-panel,.inline-book-editor,.inline-image-editor')){
   const box=panel.getBoundingClientRect(),visible=Math.min(box.bottom,view.bottom)-Math.max(box.top,view.top);
   if(visible<(view.bottom-view.top)*.45)continue;
@@ -46,6 +49,7 @@ export function restorePosition(root:HTMLElement|null,saved:ReadingPosition|null
   let index=saved.index;
   if(saved.context&&stream.slice(index,index+saved.context.length)!==saved.context){const match=stream.indexOf(saved.context);if(match>=0)index=match}
   const behavior=root.style.scrollBehavior;root.style.scrollBehavior='auto';window.scrollTo(window.scrollX,saved.outer);
+  if(saved.captureId){const image=document.getElementById(saved.captureId);if(image&&root.contains(image)){root.scrollTop+=image.getBoundingClientRect().top-(bounds(root).top+saved.offset);root.style.scrollBehavior=behavior;return}}
   if(!saved.context){root.scrollTop=saved.scroll;root.style.scrollBehavior=behavior;return}
   let remaining=index,found=false;
   for(const node of list){const length=compact(node.data).length;if(remaining>=length){remaining-=length;continue}
