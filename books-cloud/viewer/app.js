@@ -163,7 +163,7 @@ function renderAllPages(){
   
   // Merge broken paragraphs across pages
   // Sentence enders: 。 ！ ？ 」 . ! ?
-  if(NAV.navigationMode !== "structured" && !window.__beEditing) fullHtml = fullHtml.replace(/([^。！？！」.!?])<\/p>\s*<span id="page-(\d+)" class="page-anchor" data-page="\d+"><\/span>\s*<p(?:\s[^>]*)?>/g, '$1<span id="page-$2" class="page-anchor" data-page="$2"></span>');
+  if(NAV.navigationMode !== "structured" && !window.__beEditing && !fullHtml.includes("data-be-formatted")) fullHtml = fullHtml.replace(/([^。！？！」.!?])<\/p>\s*<span id="page-(\d+)" class="page-anchor" data-page="\d+"><\/span>\s*<p(?:\s[^>]*)?>/g, '$1<span id="page-$2" class="page-anchor" data-page="$2"></span>');
   
   const content = document.createElement("article");
   content.className = "page-content continuous-content";
@@ -175,7 +175,7 @@ function renderAllPages(){
       const anchor=content.querySelector("#page-"+p);
       const before=anchor && anchor.previousElementSibling;
       const after=anchor && anchor.nextElementSibling;
-      if(before && after && before.tagName === "P" && after.tagName === "P"){
+      if(before && after && before.tagName === "P" && after.tagName === "P" && !before.hasAttribute("data-be-formatted") && !after.hasAttribute("data-be-formatted")){
         before.appendChild(anchor);
         if(/[A-Za-z0-9]$/.test(before.textContent) && /^[A-Za-z0-9]/.test(after.textContent)) before.appendChild(document.createTextNode(" "));
         while(after.firstChild) before.appendChild(after.firstChild);

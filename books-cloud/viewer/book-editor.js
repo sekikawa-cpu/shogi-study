@@ -40,7 +40,7 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
     const image=node.tagName==='IMG'?node:node.querySelector('img');if(image){image.src=patch.image;image.removeAttribute('srcset');image.removeAttribute('width');image.removeAttribute('height')}
    }else if(patch.text!==undefined){
     const tag=patch.kind==='heading'?'h'+Math.max(1,Math.min(4,Number(patch.level)||2)):({paragraph:'p',note:'aside',quote:'blockquote',list:'li',code:'pre'}[patch.kind]||'p');
-    const next=el(tag,patch.text);next.id=original.anchor;next.dataset.beKey=patch.key;node.replaceWith(next);
+    const next=el(tag,patch.text);next.id=original.anchor;next.dataset.beKey=patch.key;next.dataset.beFormatted='true';next.style.whiteSpace='pre-wrap';next.style.paddingInlineStart=Math.max(0,Math.min(4,Number(patch.indent)||0))+'em';next.style.textIndent=Math.max(0,Math.min(2,Number(patch.firstLineIndent)||0))+'em';node.replaceWith(next);
    }
   }
   for(const [page,root]of roots){PAGES[page].html=root.innerHTML;PAGES[page].text=root.textContent}
@@ -89,7 +89,11 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
    const toc=el('input');toc.type='checkbox';toc.checked=patches.get(original.key)?.includeToc!==false;const label=el('label','目次に表示');label.prepend(toc);
    const options=el('div');options.className='be-actions';options.append(kind,level,label);panel.append(options);
    const area=el('textarea');area.value=node.textContent;area.rows=Math.max(4,Math.min(16,Math.ceil(area.value.length/55)));area.setAttribute('aria-label','本文・見出しの内容');panel.append(area);
-   action('保存して反映',()=>commit(original,{text:area.value,kind:kind.value,level:Number(level.value),includeToc:kind.value==='heading'&&toc.checked}));
+   const formatting=el('div');formatting.className='be-actions';
+   const spacing=(title,max,value)=>{const label=el('label',title+' '),select=el('select');select.setAttribute('aria-label',title);for(let n=0;n<=max;n++){const option=el('option',n+'字');option.value=n;select.append(option)}select.value=String(value||0);label.append(select);formatting.append(label);return select};
+   const indent=spacing('段落のインデント',4,patches.get(original.key)?.indent),firstLine=spacing('先頭行の字下げ',2,patches.get(original.key)?.firstLineIndent);
+   const newline=el('button','改行を挿入');newline.onclick=()=>{area.setRangeText('\n',area.selectionStart,area.selectionEnd,'end');area.focus()};formatting.append(newline);panel.append(formatting);
+   action('保存して反映',()=>commit(original,{text:area.value,kind:kind.value,level:Number(level.value),includeToc:kind.value==='heading'&&toc.checked,indent:Number(indent.value),firstLineIndent:Number(firstLine.value)}));
   }else{
    const image=el('img');image.src=(node.tagName==='IMG'?node:node.querySelector('img')).src;image.alt='編集対象の画像';
    const surface=el('div');surface.className='be-image-surface';surface.append(image);const selection=el('div');selection.className='be-selection';surface.append(selection);panel.append(surface);

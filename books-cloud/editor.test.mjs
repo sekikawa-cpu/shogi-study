@@ -48,3 +48,6 @@ test('source updates invalidate earlier edits rather than replace new text',asyn
 test('cancelled image deletion leaves controls usable and image unchanged',async()=>{
  const e=await environment();try{e.button('本文を編集').click();e.button('この画像を編集').click();e.w.confirm=()=>false;e.button('この項目を削除').click();await until(()=>!e.button('この項目を削除').disabled);assert.equal(e.store.size,0);assert.ok(e.PAGES[1].html.includes('figure.png'));e.button('編集を閉じる').click();assert.equal(e.w.document.querySelector('.be-panel'),null)}finally{e.close()}
 });
+test('manual line breaks and paragraph indentation survive cloud reload',async()=>{
+ const e=await environment();try{e.button('本文を編集').click();e.button('この本文を編集').click();e.w.document.querySelector('textarea').value='　先頭の空白\n次の行\n\n次の段落';e.w.document.querySelector('[aria-label="段落のインデント"]').value='2';e.w.document.querySelector('[aria-label="先頭行の字下げ"]').value='1';e.button('保存して反映').click();await until(()=>e.store.size===1);const second=await environment(e.store);try{const p=second.w.document.querySelector('#p1');assert.equal(p.textContent,'　先頭の空白\n次の行\n\n次の段落');assert.equal(p.style.whiteSpace,'pre-wrap');assert.equal(p.style.paddingInlineStart,'2em');assert.equal(p.style.textIndent,'1em')}finally{second.close()}}finally{e.close()}
+});
