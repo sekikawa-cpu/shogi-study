@@ -579,7 +579,8 @@ mainContentEl.addEventListener("scroll", ()=>{
 }, {passive:true});
 
 if(window.installBookEditor) window.installBookEditor({bookId,NAV,PAGES,container:pagesContainer,refresh:()=>{
- const savedScroll=mainContentEl.scrollTop;searchIndex=null;buildNavTree();renderAllPages();mainContentEl.scrollTop=savedScroll;
+ const savedPosition=window.ReaderPosition?.capturePosition(mainContentEl),navScroll=sidebar.scrollTop;searchIndex=null;buildNavTree();renderAllPages();sidebar.scrollTop=navScroll;
+ window.ReaderPosition?.restorePosition(mainContentEl,savedPosition);
  renderBreadcrumb();updateNavActive();if(searchInput.value.trim())doSearch(searchInput.value);
 }});
 

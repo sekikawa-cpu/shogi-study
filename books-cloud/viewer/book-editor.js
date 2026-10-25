@@ -76,6 +76,7 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
  }
  function open(original,node,tools){
   if(saving)return;
+  const scroller=container.closest('.main-content')||container.parentElement,position=window.ReaderPosition?.capturePosition(scroller);
   container.querySelectorAll('.be-panel').forEach(n=>n.remove());editing=original.key;
   const panel=el('section');panel.className='be-panel';panel.setAttribute('aria-label',original.isImage?'画像エディタ':'本文・見出しエディタ');tools.after(panel);
   const error=el('p');error.className='be-error';error.setAttribute('role','alert');
@@ -109,9 +110,9 @@ window.installBookEditor=async function({bookId,NAV,PAGES,container,refresh}){
   }
   const remove=action('この項目を削除',async()=>{if(!confirm('この項目を削除します。後から元に戻せます。'))return;await commit(original,{deleted:true})});remove.className='be-danger';
   action('原本の内容に戻す',()=>commit(original,{reset:true}));
-  const cancel=el('button','編集を閉じる');cancel.onclick=()=>{panel.remove();editing=null};actions.append(cancel);panel.append(actions,error);panel.scrollIntoView({block:'nearest'});
+  const cancel=el('button','編集を閉じる');cancel.onclick=()=>{const saved=window.ReaderPosition?.capturePosition(scroller);panel.remove();editing=null;window.ReaderPosition?.restorePosition(scroller,saved)};actions.append(cancel);panel.append(actions,error);window.ReaderPosition?.restorePosition(scroller,position);
  }
- toggle.onclick=()=>{enabled=!enabled;window.__beEditing=enabled;toggle.textContent=enabled?'編集を終了':'本文を編集';toggle.setAttribute('aria-pressed',enabled);if(!enabled){container.querySelectorAll('.be-panel').forEach(n=>n.remove());editing=null}refresh();decorate()};
+ toggle.onclick=()=>{const scroller=container.closest('.main-content')||container.parentElement,position=window.ReaderPosition?.capturePosition(scroller);enabled=!enabled;window.__beEditing=enabled;toggle.textContent=enabled?'編集を終了':'本文を編集';toggle.setAttribute('aria-pressed',enabled);if(!enabled){container.querySelectorAll('.be-panel').forEach(n=>n.remove());editing=null}refresh();decorate();window.ReaderPosition?.restorePosition(scroller,position)};
  toolbar.querySelector('.be-reload').onclick=()=>{if(editing&&!confirm('未保存の入力を閉じてクラウドから読み込みますか？'))return;load()};
  undoButton.onclick=async()=>{const item=undo.at(-1);if(!item)return;const original=originals.get(item.key);try{undoButton.disabled=true;await commit(original,item.previous?{...item.previous}:{reset:true},false);undo.pop();undoButton.disabled=!undo.length}catch(e){status.textContent=e.message;undoButton.disabled=false}};
  document.addEventListener('book-reader-rendered',decorate);
