@@ -4,6 +4,7 @@ import path from'node:path';
 import{fileURLToPath}from'node:url';
 import{createHash,createCipheriv,createDecipheriv,pbkdf2Sync,randomBytes}from'node:crypto';
 import{gzipSync,gunzipSync}from'node:zlib';
+import vm from'node:vm';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dir=path.join(root,'public/books-study');
 const manifest=JSON.parse(await fs.readFile(path.join(dir,'encrypted-manifest.json'),'utf8'));
 const uid=(await fs.readFile('C:/Apps/書籍/book-app-owner-uid.txt','utf8')).trim();
@@ -12,6 +13,18 @@ function unpack(bytes){const cipher=createDecipheriv('aes-256-gcm',pbkdf2Sync(se
 const original=unpack(Buffer.concat(await Promise.all(manifest.parts.map(n=>{if(!/^encrypted-[a-f0-9]{16}-\d+\.bundle$/.test(n))throw Error('Invalid part');return fs.readFile(path.join(dir,n))}))));
 const payload=structuredClone(original),names=['text.html','app.js','book-editor.js','book-editor.css','library.js','library.css'];
 for(const name of names)payload.files[name]=(await fs.readFile(path.join(root,'books-cloud/viewer',name))).toString('base64');
+const coverOption=process.argv.indexOf('--cover');
+if(coverOption!==-1){
+ const config=JSON.parse(await fs.readFile(process.argv[coverOption+1],'utf8'));
+ if(!/^[a-zA-Z0-9_-]+$/.test(config.bookId)||!/^[a-zA-Z0-9_.-]+\.jpg$/.test(config.fileName))throw Error('Invalid cover destination');
+ const script=Buffer.from(payload.files['books.js'],'base64').toString('utf8'),context={window:{}};vm.runInNewContext(script,context,{timeout:3000});
+ const book=context.window.BOOKS.find(b=>b.id===config.bookId);if(!book||book.title!==config.title)throw Error('Cover title and book ID do not match');
+ const image=await fs.readFile(config.source);if(image.length>10*1024*1024||image[0]!==255||image[1]!==216)throw Error('Invalid JPEG cover');
+ const destination=`books/${config.bookId}/${config.fileName}`;
+ payload.files[destination]=image.toString('base64');payload.files['books.js']=Buffer.from(script.replaceAll(book.cover,destination)).toString('base64');
+ names.push(destination,'books.js');
+ console.log(JSON.stringify({coverBookId:config.bookId,originalCoverRetained:true,newCover:destination}));
+}
 for(const [name,data]of Object.entries(original.files))if(!names.includes(name)&&payload.files[name]!==data)throw Error('Unrelated asset changed');
 const salt=randomBytes(16),iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',pbkdf2Sync(secret,salt,600000,32,'sha256'),iv);
 const encrypted=Buffer.concat([cipher.update(gzipSync(Buffer.from(JSON.stringify(payload)),{level:6})),cipher.final()]);
