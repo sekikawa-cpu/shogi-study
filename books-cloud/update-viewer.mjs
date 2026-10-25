@@ -10,7 +10,7 @@ const uid=(await fs.readFile('C:/Apps/書籍/book-app-owner-uid.txt','utf8')).tr
 const secret=createHash('sha256').update('book-app-v3:'+uid).digest('base64url');
 function unpack(bytes){const cipher=createDecipheriv('aes-256-gcm',pbkdf2Sync(secret,bytes.subarray(8,24),600000,32,'sha256'),bytes.subarray(24,36));cipher.setAuthTag(bytes.subarray(36,52));return JSON.parse(gunzipSync(Buffer.concat([cipher.update(bytes.subarray(52)),cipher.final()])))}
 const original=unpack(Buffer.concat(await Promise.all(manifest.parts.map(n=>{if(!/^encrypted-[a-f0-9]{16}-\d+\.bundle$/.test(n))throw Error('Invalid part');return fs.readFile(path.join(dir,n))}))));
-const payload=structuredClone(original),names=['text.html','app.js','book-editor.js','book-editor.css'];
+const payload=structuredClone(original),names=['text.html','app.js','book-editor.js','book-editor.css','library.js','library.css'];
 for(const name of names)payload.files[name]=(await fs.readFile(path.join(root,'books-cloud/viewer',name))).toString('base64');
 for(const [name,data]of Object.entries(original.files))if(!names.includes(name)&&payload.files[name]!==data)throw Error('Unrelated asset changed');
 const salt=randomBytes(16),iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',pbkdf2Sync(secret,salt,600000,32,'sha256'),iv);
