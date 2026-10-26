@@ -8,7 +8,9 @@
   if(plan.sections?.length){nav.sections=structuredClone(plan.sections);nav.navigationMode='structured';}
  }
  function render(container,bookId,nav){
-  const plan=window.COMIC_LAYOUTS?.[bookId];if(!plan||!nav.captureReading)return;
+  const plan=window.COMIC_LAYOUTS?.[bookId];
+  if(!plan){const captures=[...container.querySelectorAll('figure[id]')].filter(e=>/^p\d+-capture-(whole|right|left)$/.test(e.id));if(!captures.length)return;container.classList.add('comic-import-reading');fitPages(container);for(const figure of captures)figure.classList.add('comic-import-page');return}
+  if(!nav.captureReading)return;
   container.classList.add('capture-reading');fitPages(container);
   const title=document.createElement('h1');title.className='capture-book-title';title.textContent=nav.book.title;container.prepend(title);
   for(const [page,item]of Object.entries(plan.pages)){

@@ -12,3 +12,6 @@
 /* Display at 80% of the previous width, shrinking further to fit reader height. */
 .capture-reading .capture-single{width:min(80%,680px)}
 .capture-reading .capture-spread{width:80%}
+
+/* Already-published local comic captures retain their original IDs and cloud edits. */
+.comic-import-reading .comic-import-page>img{display:block;width:auto!important;height:auto!important;max-width:80%!important;max-height:var(--capture-page-height,calc(100dvh - 180px));object-fit:contain!important;margin-inline:auto!important}

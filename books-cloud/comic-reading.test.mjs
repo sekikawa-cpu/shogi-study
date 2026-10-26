@@ -24,3 +24,7 @@ test('ordinary books and deleted figures are unchanged',()=>{
 test('comic pieces use their own aspect ratio to fit height without altering crop geometry',()=>{
  const{dom,w}=setup();try{const pieces=[...w.document.querySelectorAll('.capture-piece')];assert.match(pieces[0].style.maxWidth,/--capture-page-height/);assert.ok(pieces[0].style.maxWidth.includes(String(.37*2400/1800)));assert.ok(pieces[1].style.maxWidth.includes(String(.63*2400/1800)));assert.equal(w.document.querySelector('article').style.getPropertyValue('--capture-page-height'),(w.innerHeight-40)+'px')}finally{dom.window.close()}
 });
+
+test('existing local comic captures fit without rewriting source HTML or editor IDs',()=>{
+ const{dom,w}=setup();try{const root=w.document.querySelector('article');root.innerHTML='<figure id="p3-capture-right" data-be-key="source-key"><img src="original.png"></figure><figure id="ordinary"><img src="diagram.png"></figure>';w.ComicReading.render(root,'local-new',{book:{title:'漫画'}});assert.ok(root.classList.contains('comic-import-reading'));assert.ok(root.firstElementChild.classList.contains('comic-import-page'));assert.equal(root.firstElementChild.dataset.beKey,'source-key');assert.equal(root.firstElementChild.querySelector('img').getAttribute('src'),'original.png');assert.ok(!root.lastElementChild.classList.contains('comic-import-page'))}finally{dom.window.close()}
+});
