@@ -8,3 +8,7 @@
 .capture-reading .capture-viewport img{display:block;width:100%;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .capture-reading .capture-viewport img.capture-positioned{position:absolute;top:0;object-fit:fill!important}
 .capture-layout-control{display:inline-flex;gap:8px;align-items:center;margin-left:8px;font-size:.85rem}
+
+/* Display at 80% of the previous width, shrinking further to fit reader height. */
+.capture-reading .capture-single{width:min(80%,680px)}
+.capture-reading .capture-spread{width:80%}

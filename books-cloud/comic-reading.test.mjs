@@ -20,3 +20,7 @@ test('manual layout overrides survive display rendering',()=>{
 test('ordinary books and deleted figures are unchanged',()=>{
  const{dom,w}=setup();try{const root=w.document.querySelector('article');root.innerHTML='<span id="page-1"></span><span data-be-removed="true"></span>';w.ComicReading.render(root,'test',{book:{title:'漫画'},captureReading:true});assert.equal(root.querySelectorAll('figure').length,0);root.innerHTML='<p>本文</p>';const original=root.innerHTML;const nav={book:{format:'text'}};w.ComicReading.configure('test',nav);w.ComicReading.render(root,'test',nav);assert.equal(root.innerHTML,original)}finally{dom.window.close()}
 });
+
+test('comic pieces use their own aspect ratio to fit height without altering crop geometry',()=>{
+ const{dom,w}=setup();try{const pieces=[...w.document.querySelectorAll('.capture-piece')];assert.match(pieces[0].style.maxWidth,/--capture-page-height/);assert.ok(pieces[0].style.maxWidth.includes(String(.37*2400/1800)));assert.ok(pieces[1].style.maxWidth.includes(String(.63*2400/1800)));assert.equal(w.document.querySelector('article').style.getPropertyValue('--capture-page-height'),(w.innerHeight-40)+'px')}finally{dom.window.close()}
+});
