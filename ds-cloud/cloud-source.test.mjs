@@ -24,6 +24,7 @@ function server(){
   doc:(_,...parts)=>parts.join('/'),serverTimestamp:()=>new Date().toISOString(),
   getDoc:async path=>document(path),
   getDocs:async ref=>{if(api.failRead)throw {code:'unavailable'};return snapshot(ref);},
+  getDocsFromServer:async ref=>{if(api.failRead)throw {code:'unavailable'};return snapshot(ref);},
   onSnapshot:(ref,_options,next,error)=>{const listener={ref,next,error};listeners.add(listener);queueMicrotask(()=>next(snapshot(ref)));return()=>listeners.delete(listener);},
   runTransaction:(_cloud,fn)=>{
    const run=transaction.then(async()=>{

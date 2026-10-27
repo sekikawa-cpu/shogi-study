@@ -1,6 +1,6 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
-import {initializeFirestore,collection,query,where,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {initializeFirestore,collection,query,where,doc,getDoc,getDocsFromServer,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {firebaseConfig,OWNER_UID} from '../public/ds-study/config.js';
 import {DS_APP_ID,isDSRecord,isLocalDSValue,projectRecord,mergeOperation} from './sync-model.js';
 import {recoveryCandidates} from './sync-recovery.js';
@@ -126,7 +126,7 @@ async function refresh(){
    // Only the first recovery reads legacy records. Subsequent reads and the
    // live listener are scoped to DS, reducing reads of other learning apps.
    const refs=recovered?appRecords():collection(cloud,'users',user.uid,'records');
-   const snapshot=await getDocs(refs);
+   const snapshot=await getDocsFromServer(refs);
    if(bridge!==api)return;
    if(!recovered){
     const rows=snapshot.docs.map(x=>x.data());
