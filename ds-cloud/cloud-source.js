@@ -1,17 +1,28 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut} from 'firebase/auth';
-import {initializeFirestore,collection,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {initializeFirestore,collection,query,where,doc,getDoc,getDocs,onSnapshot,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {firebaseConfig,OWNER_UID} from '../public/ds-study/config.js';
 import {DS_APP_ID,isDSRecord,isLocalDSValue,projectRecord,mergeOperation} from './sync-model.js';
+import {recoveryCandidates} from './sync-recovery.js';
 
 const app=initializeApp(firebaseConfig),auth=getAuth(app);
 const cloud=initializeFirestore(app,{});
 const el=id=>document.getElementById(id),frame=el('study');
 let user=null,journal=null,bridge=null,unsubscribe=null,flushing=false,failed=false,privateUrl=null;
+let readError=null,writeError=null,lastPull=0,pendingCount=0,refreshing=null,nextRetry=0,backupDb=null;
 const APP_ID=DS_APP_ID;
 const deviceId=localStorage.getItem('ds-cloud-device')||crypto.randomUUID();localStorage.setItem('ds-cloud-device',deviceId);
 const message=text=>{el('message').textContent=text;};
 const status=text=>{el('sync').textContent=text;};
+function syncStatus(){
+ if(!bridge)return;
+ if(!navigator.onLine){status('オフライン・端末に保存済み');return;}
+ const error=readError||writeError;
+ if(error){const code=error.code||'local-error';status(code==='resource-exhausted'?'同期保留：Firebaseの利用上限（端末保存済み）':`同期未完了・端末に保存済み（${code}）`);return;}
+ if(pendingCount||flushing){status(`送信中・未同期 ${pendingCount}件`);return;}
+ status(lastPull?'同期済み '+new Date(lastPull).toLocaleTimeString('ja-JP'):'クラウドへの接続を確認しています…');
+}
+function retryLater(error){nextRetry=Date.now()+(error?.code==='resource-exhausted'?30*60*1000:30000);}
 const errorText=e=> e.code==='auth/popup-closed-by-user'?'ログイン画面が閉じられました。もう一度ログインしてください。':e.code==='auth/unauthorized-domain'?'このサイトのログイン設定を確認する必要があります。':e.code==='permission-denied'?'このアカウントには学習データの閲覧権限がありません。':'通信できませんでした。接続を確認して再読み込みしてください。';
 
 // A durable, per-account journal makes transactions retryable across browser restarts.
@@ -19,19 +30,23 @@ function openJournal(uid){return new Promise((resolve,reject)=>{const r=indexedD
 function journalTx(mode,fn){return new Promise((resolve,reject)=>{const t=journal.transaction('outbox',mode),r=fn(t.objectStore('outbox'));t.oncomplete=()=>resolve(r?.result);t.onerror=()=>reject(t.error);});}
 const queued=()=>journalTx('readonly',s=>s.getAll());
 const recordId=(s,key)=>encodeURIComponent(APP_ID+'|'+s+'|'+key);
-async function enqueue(s,key,value,old){
+async function enqueue(s,key,value,old,{recovery=false,flushNow=true}={}){
  const data=projectRecord(s,value),prior=projectRecord(s,old||{});
  if(JSON.stringify(data)===JSON.stringify(prior))return;
- const op={id:crypto.randomUUID(),app:APP_ID,store:s,key:String(key),data,at:new Date().toISOString(),deviceId};
+ const op={id:crypto.randomUUID(),app:APP_ID,store:s,key:String(key),data,at:new Date().toISOString(),deviceId,recovery};
  if(s==='quizzes'&&data){op.seenDelta=Math.max(0,data.seen-(prior.seen||0));op.correctDelta=Math.max(0,data.correct-(prior.correct||0));}
  await journalTx('readwrite',os=>os.put(op));
- status(navigator.onLine?'保存しています…':'オフライン・端末に保存済み');
- void flush();
+ pendingCount=await journalTx('readonly',os=>os.count());syncStatus();
+ if(flushNow)void flush();
 }
 async function flush(){
  if(flushing||!user||!journal)return;flushing=true;
  try{
-  for(const op of await queued()){
+  for(const saved of await queued()){
+   // Old releases wrote outbox entries without an app field. Firestore rejects
+   // undefined fields; keep their operation IDs so retries remain idempotent.
+   const op={...saved,app:saved.app||APP_ID};
+   if(op.app!==APP_ID)throw Object.assign(new Error('Foreign app operation retained in local queue'),{code:'sync/foreign-app'});
    const ref=doc(cloud,'users',user.uid,'records',recordId(op.store,op.key));
    const receipt=doc(cloud,'users',user.uid,'receipts',op.id);
    await runTransaction(cloud,async tx=>{
@@ -43,11 +58,14 @@ async function flush(){
    await journalTx('readwrite',os=>os.delete(op.id));
    if(bridge){const saved=await getDoc(ref);await apply({docChanges:()=>[{doc:saved}]});}
   }
-  failed=false;status('同期済み');
- }catch(e){failed=true;status(navigator.onLine?'端末に保存済み・同期を再試行します':'オフライン・端末に保存済み');console.warn('Progress sync',e.code||e.message);}
- finally{flushing=false;if(!failed&&(await queued()).length)setTimeout(()=>void flush(),0);}
+  failed=false;writeError=null;
+ }catch(e){failed=true;writeError=e;retryLater(e);console.warn('Progress sync',e.code||e.message);}
+ finally{flushing=false;pendingCount=await journalTx('readonly',os=>os.count());syncStatus();if(!failed&&pendingCount)setTimeout(()=>void flush(),0);}
 }
 async function apply(snapshot){
+ try{await applyRecords(snapshot);}catch(error){readError=error;retryLater(error);syncStatus();throw error;}
+}
+async function applyRecords(snapshot){
  if(!bridge)return;
  const pending=await queued(),blocked=new Set(pending.map(x=>recordId(x.store,x.key)));
  const changes=snapshot.docChanges();
@@ -67,32 +85,73 @@ async function apply(snapshot){
  bridge.emit();
  if(remoteChanged&&frame.contentWindow)frame.contentWindow.dispatchEvent(new frame.contentWindow.Event('ds-cloud-updated'));
 }
-async function pruneForeignLocalData(api){
+function hideForeignLocalData(api){
  for(const store of ['plan','logs','cards','notes','quizzes','scores']){
   const list=api.state[store]||[];
   for(let i=list.length-1;i>=0;i--){
    const value=list[i];if(isLocalDSValue(store,value))continue;
-   await api.db.applyRemote(store,String(value.id),null);list.splice(i,1);
+   // Keep the stored record for recovery; hide foreign-app data only in memory.
+   list.splice(i,1);
   }
  }
 }
+function appRecords(){return query(collection(cloud,'users',user.uid,'records'),where('app','==',APP_ID));}
+async function openBackup(){
+ if(!backupDb)backupDb=await new Promise((resolve,reject)=>{const r=indexedDB.open('ds-cloud-sync-backups-'+user.uid,1);r.onupgradeneeded=()=>r.result.createObjectStore('backups');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+ return backupDb;
+}
+async function loadLocalBackup(){
+ const db=await openBackup();return new Promise((resolve,reject)=>{const r=db.transaction('backups').objectStore('backups').get('before-recovery-v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+}
+async function saveLocalBackup(api){
+ await openBackup();
+ const data=await api.db.exportAll();
+ await new Promise((resolve,reject)=>{const t=backupDb.transaction('backups','readwrite'),s=t.objectStore('backups'),r=s.get('before-recovery-v2');r.onsuccess=()=>{if(!r.result)s.put(data,'before-recovery-v2');};t.oncomplete=resolve;t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error);});
+}
+function listen(){
+ unsubscribe?.();const uid=user.uid;let chain=Promise.resolve();
+ unsubscribe=onSnapshot(appRecords(),{includeMetadataChanges:true},snap=>{
+  if(snap.metadata?.fromCache||user?.uid!==uid)return;
+  chain=chain.then(async()=>{await apply(snap);lastPull=Date.now();readError=null;syncStatus();}).catch(e=>{readError=e;retryLater(e);syncStatus();console.warn('Remote progress',e.code||e.message);});
+ },e=>{readError=e;retryLater(e);syncStatus();});
+}
+async function refresh(){
+ if(refreshing)return refreshing;
+ if(!bridge||!user||!navigator.onLine){syncStatus();return;}
+ const api=bridge;
+ refreshing=(async()=>{
+  try{
+   const recovered=await api.db.kvGet('cloudRecoveryV2',false);
+   if(!recovered)await saveLocalBackup(api);
+   // Only the first recovery reads legacy records. Subsequent reads and the
+   // live listener are scoped to DS, reducing reads of other learning apps.
+   const refs=recovered?appRecords():collection(cloud,'users',user.uid,'records');
+   const snapshot=await getDocs(refs);
+   if(bridge!==api)return;
+   if(!recovered){
+    const rows=snapshot.docs.map(x=>x.data());
+    for(const item of recoveryCandidates(api.state,rows,await queued()))await enqueue(item.store,item.key,item.value,item.old,{recovery:true,flushNow:false});
+    await api.db.applyRemote('kv','cloudRecoveryV2',{k:'cloudRecoveryV2',v:true});
+   }
+   await apply(snapshot);lastPull=Date.now();readError=null;
+   const rows=snapshot.docs.map(item=>item.data()).filter(item=>item.app===APP_ID);
+   if(!rows.some(item=>item.store==='kv'&&item.key==='settings'))await enqueue('kv','settings',{k:'settings',v:api.state.settings},null,{flushNow:false});
+   if(!rows.some(item=>item.store==='plan'))for(const task of api.state.plan)await enqueue('plan',task.id,task,null,{flushNow:false});
+   listen();await flush();
+  }catch(e){readError=e;retryLater(e);syncStatus();console.warn('Cloud receive',e.code||e.message);}
+  finally{refreshing=null;syncStatus();}
+ })();return refreshing;
+}
 async function attach(api){
- bridge=api;
- await pruneForeignLocalData(api);
- const refs=collection(cloud,'users',user.uid,'records');
- const snapshot=await getDocs(refs);await apply(snapshot);
- api.db.setObserver(enqueue);
- // The initial preferences and plan also need to be available on the second PC.
- const hasAppRecords=snapshot.docs.some(item=>item.data().app===APP_ID);
- if(!hasAppRecords){await enqueue('kv','settings',{k:'settings',v:api.state.settings},null);for(const task of api.state.plan)await enqueue('plan',task.id,task,null);}
- let chain=Promise.resolve();
- unsubscribe=onSnapshot(refs,snap=>{chain=chain.then(()=>apply(snap)).catch(e=>console.warn('Remote progress',e));},e=>status(errorText(e)));
- await journalTx('readonly',os=>os.count());void flush();
+ bridge=api;hideForeignLocalData(api);api.db.setObserver(enqueue);
+ // A failed receive must not prevent using/exporting the saved local progress.
+ await refresh();
 }
 async function privateDoc(id){const snap=await getDoc(doc(cloud,'content',id));if(!snap.exists())throw new Error('学習データがまだ登録されていません');return snap.data();}
 async function start(u){
  user=u;journal=await openJournal(u.uid);
  window.DSCloud={uid:u.uid,attach,scan:async id=>(await privateDoc(id)).data};
+ el('sync-retry').hidden=false;el('sync-backup').hidden=false;
  status('教材を読み込んでいます…');message('教材を読み込んでいます…');
  const manifest=await privateDoc('manifest');
  const parts=await Promise.all(manifest.chunks.map(privateDoc));
@@ -116,12 +175,27 @@ el('logout').onclick=async()=>{
  if(flushing||(journal&&(await queued()).length)){message('未同期の記録があります。接続して同期が完了してからログアウトしてください。');status('未同期のためログアウトを保留');return;}
  await signOut(auth);location.reload();
 };
+el('sync-retry').onclick=async()=>{
+ el('sync-retry').disabled=true;
+ try{await refresh();}finally{el('sync-retry').disabled=false;}
+};
+el('sync-backup').onclick=async()=>{
+ if(!bridge)return;
+ const data=await loadLocalBackup();
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data||await bridge.db.exportAll(),null,2)],{type:'application/json'}));
+ const link=document.createElement('a');link.href=url;link.download='ds-kentei-sync-backup-'+new Date().toISOString().slice(0,10)+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
 onAuthStateChanged(auth,async u=>{
- if(!u){user=null;bridge=null;unsubscribe?.();frame.src='about:blank';if(privateUrl)URL.revokeObjectURL(privateUrl);privateUrl=null;frame.hidden=true;el('gate').hidden=false;el('logout').hidden=true;el('login').disabled=false;message('本人のGoogleアカウントでログインしてください。');status('ログインしていません');return;}
- if(u.uid!==OWNER_UID||!u.emailVerified){message('このアプリは所有者専用です。所有者のアカウントでログインしてください。');status('閲覧権限がありません');el('logout').hidden=false;return;}
+ if(!u||u.uid!==OWNER_UID||!u.emailVerified){
+  user=null;bridge=null;unsubscribe?.();readError=null;writeError=null;lastPull=0;backupDb?.close();backupDb=null;
+  frame.src='about:blank';if(privateUrl)URL.revokeObjectURL(privateUrl);privateUrl=null;frame.hidden=true;el('gate').hidden=false;el('sync-retry').hidden=true;el('sync-backup').hidden=true;el('logout').hidden=!u;el('login').disabled=false;
+  message(u?'このアプリは所有者専用です。所有者のアカウントでログインしてください。':'本人のGoogleアカウントでログインしてください。');status(u?'閲覧権限がありません':'ログインしていません');return;
+ }
  try{await start(u);}catch(e){message(e.message==='学習データがまだ登録されていません'?e.message:errorText(e));status('読み込みできませんでした');el('logout').hidden=false;}
 });
-window.addEventListener('online',()=>void flush());
-window.addEventListener('offline',()=>status('オフライン・端末に保存します'));
-setInterval(()=>{if(failed)void flush();},15000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)void flush();});
+window.addEventListener('online',()=>void refresh());
+window.addEventListener('offline',syncStatus);
+setInterval(()=>{if(Date.now()>=nextRetry){if(readError)void refresh();else if(failed)void flush();}},15000);
+function resumeSync(){if(!document.hidden){if(Date.now()>=nextRetry&&(readError||Date.now()-lastPull>5*60*1000))void refresh();else void flush();}}
+window.addEventListener('focus',resumeSync);
+document.addEventListener('visibilitychange',resumeSync);

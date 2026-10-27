@@ -20,6 +20,7 @@ export function isDSRecord({app,store,key,data}){
  if(store==='notes')return DS_SUBJECTS.has(data.subjectId)||(app===DS_APP_ID&&/^seed-note-/.test(String(key)));
  if(store==='scores')return DS_SUBJECTS.has(data.subjectId)||!!data.examKey;
  if(store==='quizzes')return app===DS_APP_ID||DS_SUBJECTS.has(data.subjectId)||/^(?:seed-quiz-|ocr-|comp-)/.test(String(key));
+ if(store==='units')return app===DS_APP_ID||DS_SUBJECTS.has(data.subjectId);
  return false;
 }
 
@@ -39,7 +40,7 @@ export function projectRecord(store,value){
 }
 export function mergeOperation(op,remote){
  let data=op.data;
- if(op.store==='quizzes'&&data){const base=remote?.data||{};data={...base,...data,seen:(base.seen||0)+(op.seenDelta||0),correct:(base.correct||0)+(op.correctDelta||0)};}
+ if(op.store==='quizzes'&&data){const base=remote?.data||{};data={...base,...data,seen:op.recovery?Math.max(base.seen||0,data.seen||0):(base.seen||0)+(op.seenDelta||0),correct:op.recovery?Math.max(base.correct||0,data.correct||0):(base.correct||0)+(op.correctDelta||0)};}
  if(remote?.at>op.at&&data&&op.store!=='quizzes')data=remote.data;
  if(remote?.at>op.at&&data&&op.store==='quizzes')data={...data,flagged:remote.data?.flagged||false,lastSeen:remote.data?.lastSeen||data.lastSeen};
  return {app:op.app,store:op.store,key:op.key,data,deviceId:op.deviceId,at:remote?.at>op.at?remote.at:op.at};
