@@ -1,0 +1,27 @@
+name: Reconcile Pages production
+on:
+  workflow_dispatch:
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm and promote current main deployment
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node --input-type=module <<'JS'
+          const base=`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT}/pages/projects/shogi-study`;
+          async function api(path='',method='GET'){
+            const r=await fetch(base+path,{method,headers:{Authorization:`Bearer ${process.env.CF_TOKEN}`}});
+            const data=await r.json();if(!data.success)throw Error(JSON.stringify(data.errors));return data.result;
+          }
+          const p=await api();
+          console.log('Production branch:',p.production_branch,'canonical:',p.canonical_deployment?.id);
+          const ds=await api('/deployments');
+          const target=ds.find(d=>d.deployment_trigger?.metadata?.commit_hash==='e470deed133e3d49f4f8f3aeb7c2033faebe4144'&&d.environment==='production'&&d.latest_stage?.status==='success');
+          if(!target)throw Error('Verified production deployment for synchronization fix was not found');
+          console.log('Verified target:',target.id);
+          if(p.canonical_deployment?.id!==target.id){await api(`/deployments/${target.id}/rollback`,'POST');console.log('Production target updated');}
+          else console.log('Production already targets the verified deployment');
+          JS
