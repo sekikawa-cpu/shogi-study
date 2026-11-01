@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Keep production deployments ordered; GitHub retains the newest pending run.
+concurrency:
+  group: cloudflare-pages-production
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
