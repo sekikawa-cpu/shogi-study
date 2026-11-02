@@ -19,6 +19,19 @@ jobs:
       deployments: write
 
     steps:
+      - name: Free hosted runner space for encrypted book assets
+        shell: bash
+        run: |
+          df -h /
+          if [ "${RUNNER_ENVIRONMENT:-}" = "github-hosted" ]; then
+            for unused_toolchain in /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL; do
+              if [ -d "$unused_toolchain" ]; then
+                sudo rm -rf -- "$unused_toolchain"
+              fi
+            done
+          fi
+          df -h /
+
       - name: Checkout code
         uses: actions/checkout@v4
 
